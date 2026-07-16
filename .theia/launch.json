@@ -1,0 +1,61 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Board_Test",
+            "type": "ccs-debug",
+            "request": "launch",
+            "projectInfo": {
+                "name": "Board_Test",
+                "resourceId": "/Board_Test"
+            },
+            "connections": [
+                {
+                    "name": "Texas Instruments XDS110 USB Debug Probe",
+                    "cores": [
+                        {
+                            "name": "CORTEX_M0P",
+                            "debuggerSettings": {
+                                "data": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n<PropertyValues/>\n"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "SEGGER J-Link Emulator_0",
+                    "cores": [
+                        {
+                            "name": "CORTEX_M0P",
+                            "debuggerSettings": {
+                                "data": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n<PropertyValues/>\n"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Texas Instruments XDS110 USB Debug Probe_0",
+                    "cores": [
+                        {
+                            "name": "CORTEX_M0P",
+                            "debuggerSettings": {
+                                "data": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n<PropertyValues/>\n"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "MSPM0G3507.ccxml",
+            "type": "ccs-debug",
+            "request": "launch",
+            "targetConfig": "${workspaceFolder}\\empty_test\\targetConfigs\\MSPM0G3507.ccxml"
+        },
+        {
+            "name": "MSPM0G3507.ccxml (1)",
+            "type": "ccs-debug",
+            "request": "launch",
+            "targetConfig": "${workspaceFolder}\\Board_Test\\targetConfigs\\MSPM0G3507.ccxml"
+        }
+    ]
+}

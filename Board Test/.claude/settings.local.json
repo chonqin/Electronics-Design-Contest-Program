@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:software-dl.ti.com)",
+      "WebFetch(domain:e2e.ti.com)",
+      "WebFetch(domain:www.ti.com)",
+      "WebFetch(domain:blog.csdn.net)",
+      "Bash(grep -A 30 'GPIO6\\\\.$name' empty.syscfg)",
+      "Bash(grep -A 15 'GPIO6\\\\.$name' empty.syscfg)",
+      "Bash(xargs grep -l \"DL_GPIO_PIN_18\")",
+      "Bash(find \"/c/Ti Projects/Board Test\" -not -path '*/\\\\.*')",
+      "Read(//D/TI/mspm0_sdk_2_10_00_04/**)",
+      "Read(//D/TI/ccs/utils/sysconfig_1.27.1/**)",
+      "Read(//D/TI/sysconfig_1.26.2/**)",
+      "Read(//D/TI/ti_cgt_arm_llvm_4.0.2.LTS/**)"
+    ]
+  },
+  "env": {
+    "CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS": "1"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//D/TI/mspm0_sdk_2_10_00_04/**)",
+      "Read(//D/TI/ccs/utils/sysconfig_1.27.1/**)",
+      "Read(//D/TI/sysconfig_1.26.2/**)",
+      "Read(//D/TI/ti_cgt_arm_llvm_4.0.2.LTS/**)"
+    ]
+  },
+  "env": {
+    "CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS": "1"
+  }
+}
