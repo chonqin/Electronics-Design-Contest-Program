@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python *)",
+      "Bash(where pdftotext *)",
+      "Bash(where mutool *)",
+      "Bash(where python *)"
+    ]
+  }
+}
