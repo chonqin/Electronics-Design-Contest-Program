@@ -71,15 +71,25 @@ void UI_Init(void)
 void UI_Test_OLED(void)
 {
     OLED_Clear();
-    OLED_ShowString(0, 0,  (u8 *)"Encoder Test", 16, 1);
-    OLED_ShowString(0, 20, (u8 *)"E1:", 16, 1);
-    OLED_ShowString(0, 40, (u8 *)"E2:", 16, 1);
+    OLED_ShowString(0, 0,  (u8 *)"OLED Test", 16, 1);
+    OLED_ShowString(0, 20, (u8 *)"TEST String:", 16, 1);
     OLED_Refresh();
 }
 
-void UI_Test_Encoder(uint32_t count)
+void UI_Test_Encoder(int e1, int e2)
 {
-    OLED_ShowNum(10, 0,  count, 5, 16, 1);
+    char buf[16];
+
+    clear_text_row(20);
+    clear_text_row(40);
+    OLED_ShowString(0, 0, (u8 *)"Encoder Test", 16, 1);
+    OLED_ShowString(0, 20, (u8 *)"E1:", 16, 1);
+    OLED_ShowString(0, 40, (u8 *)"E2:", 16, 1);
+
+    (void)snprintf(buf, sizeof(buf), "%+7d", e1);
+    OLED_ShowString(24, 20, (u8 *)buf, 16, 1);
+    (void)snprintf(buf, sizeof(buf), "%+7d", e2);
+    OLED_ShowString(24, 40, (u8 *)buf, 16, 1);
     OLED_Refresh();
 }
 

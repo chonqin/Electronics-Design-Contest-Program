@@ -30,12 +30,11 @@ void UI_Init(void);
 void UI_Test_OLED(void);
 
 /**
- * @brief 刷新编码器实时数据到 OLED
- * @param count  编码器计数值
- * @param val_i  全局脉冲计数 i
- * @param val_j  全局脉冲计数 j
+ * @brief Refresh dual encoder real-time counts to OLED.
+ * @param e1 Encoder 1 count.
+ * @param e2 Encoder 2 count.
  */
-void UI_Test_Encoder(uint32_t count);
+void UI_Test_Encoder(int e1, int e2);
 
 /** @brief 显示 IMU 校准等待界面 */
 void UI_IMU_Calibrating(void);

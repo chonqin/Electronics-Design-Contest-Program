@@ -65,6 +65,16 @@ static uint8_t test_single_motor(Motor_ID motor)
     return 0;
 }
 
+/**
+ * @brief Convert encoder direction enum to a compact log string.
+ * @param dir Encoder direction.
+ * @return Direction string.
+ */
+static const char *encoder_dir_str(ENCODER_DIR dir)
+{
+    return (dir == FORWARD) ? "F" : "R";
+}
+
 void BSP_Test_Motor(void)
 {
     uint8_t result_a;
@@ -102,18 +112,25 @@ void BSP_Test_OLED(void)
 
 void BSP_Test_Encoder(void)
 {
-    uint32_t count;
+    int e1_count;
+    int e2_count;
 
     encoder_init();
     Motor_Init();
     UI_Init();
 
     Motor_SetDuty(MOTOR_A, 3300);
+    Motor_SetDuty(MOTOR_B, 3300);
 
     while (1) {
-        count = get_encoder_count();
-        lc_printf("count : %d\r\n", count);
-        UI_Test_Encoder(count);
+        e1_count = encoder_get_count(ENCODER_1);
+        e2_count = encoder_get_count(ENCODER_2);
+        lc_printf("E1:%d %s E2:%d %s\r\n",
+                  e1_count,
+                  encoder_dir_str(encoder_get_dir(ENCODER_1)),
+                  e2_count,
+                  encoder_dir_str(encoder_get_dir(ENCODER_2)));
+        UI_Test_Encoder(e1_count, e2_count);
         delay_ms(20);
     }
 }

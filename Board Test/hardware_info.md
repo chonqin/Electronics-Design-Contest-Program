@@ -13,7 +13,7 @@
 - 开启SPI外设用于陀螺仪：MISO->PA14 , MOSI->PB19 , sclk->pa12 cs->pb25,int->pa16陀螺仪型号为icm42688p 。
 - 开启i2c外设用于OLED：SDA->PA30`、`SCL->PA29
 - 电机驱动：电机所需的定时器请自行开启
-编码器：E2A->pb8 E2B->pb9 E1A->pb7 E1B->pb6
+编码器：E2A->pb9 E2B->pb8 E1A->pb7 E1B->pb6
 电机：PWMA->pa15,AIN1->PB10 ,AIN2->PB13,BIN1->pb15,BIN2->PB16,PWMB->PA24
 使用mg310电机与霍尔编码器，1：20减速比，13线数
 

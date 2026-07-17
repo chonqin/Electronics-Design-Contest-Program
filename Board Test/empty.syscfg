@@ -60,9 +60,11 @@ mux8.inputSelect = "HSCLKMUX_SYSPLL0";
 const mux12       = system.clockTree["SYSPLLMUX"];
 mux12.inputSelect = "zSYSPLLMUX_HFCLK";
 
-const pinFunction4     = system.clockTree["HFXT"];
-pinFunction4.inputFreq = 40;
-pinFunction4.enable    = true;
+const pinFunction4        = system.clockTree["HFXT"];
+pinFunction4.inputFreq    = 40;
+pinFunction4.enable       = true;
+pinFunction4.HFCLKMonitor = true;
+pinFunction4.HFXTStartup  = 10;
 
 GPIO1.$name                                 = "GPIO_LED";
 GPIO1.associatedPins.create(2);
@@ -95,7 +97,7 @@ GPIO2.associatedPins[3].assignedPin  = "16";
 GPIO2.associatedPins[3].pin.$assign  = "PB16";
 
 GPIO3.$name                               = "GPIO_ENCODER";
-GPIO3.associatedPins.create(2);
+GPIO3.associatedPins.create(4);
 GPIO3.associatedPins[0].$name             = "E1A";
 GPIO3.associatedPins[0].assignedPort      = "PORTB";
 GPIO3.associatedPins[0].assignedPin       = "7";
@@ -112,6 +114,19 @@ GPIO3.associatedPins[1].direction         = "INPUT";
 GPIO3.associatedPins[1].interruptEn       = true;
 GPIO3.associatedPins[1].polarity          = "RISE";
 GPIO3.associatedPins[1].interruptPriority = "0";
+GPIO3.associatedPins[2].$name             = "E2A";
+GPIO3.associatedPins[2].direction         = "INPUT";
+GPIO3.associatedPins[2].assignedPort      = "PORTB";
+GPIO3.associatedPins[2].assignedPin       = "9";
+GPIO3.associatedPins[2].interruptEn       = true;
+GPIO3.associatedPins[2].polarity          = "RISE";
+GPIO3.associatedPins[2].pin.$assign       = "PB9";
+GPIO3.associatedPins[3].$name             = "E2B";
+GPIO3.associatedPins[3].assignedPort      = "PORTB";
+GPIO3.associatedPins[3].assignedPin       = "8";
+GPIO3.associatedPins[3].direction         = "INPUT";
+GPIO3.associatedPins[3].interruptEn       = true;
+GPIO3.associatedPins[3].polarity          = "RISE";
 
 GPIO4.$name                          = "GPIO_IMU_CS";
 GPIO4.port                           = "PORTB";
@@ -198,8 +213,9 @@ SPI1.peripheral.sclkPin.$assign         = "PA12";
 SPI1.peripheral.mosiPin.$assign         = "PA14";
 SPI1.peripheral.misoPin.$assign         = "PB19";
 
-SYSCTL.forceDefaultClkConfig = true;
 SYSCTL.clockTreeEn           = true;
+SYSCTL.HFCLK_Freq            = 40000000;
+SYSCTL.forceDefaultClkConfig = true;
 SYSCTL.validateClkStatus     = true;
 
 TIMER1.timerMode         = "PERIODIC";
@@ -239,6 +255,7 @@ Board.peripheral.swdioPin.$suggestSolution         = "PA19";
 GPIO2.associatedPins[1].pin.$suggestSolution       = "PB13";
 GPIO2.associatedPins[2].pin.$suggestSolution       = "PB15";
 GPIO3.associatedPins[1].pin.$suggestSolution       = "PB6";
+GPIO3.associatedPins[3].pin.$suggestSolution       = "PB8";
 GPIO4.associatedPins[0].pin.$suggestSolution       = "PB25";
 GPIO5.associatedPins[0].pin.$suggestSolution       = "PB18";
 GPIO5.associatedPins[1].pin.$suggestSolution       = "PA13";
