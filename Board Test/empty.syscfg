@@ -200,6 +200,7 @@ SPI1.peripheral.misoPin.$assign         = "PB19";
 
 SYSCTL.forceDefaultClkConfig = true;
 SYSCTL.clockTreeEn           = true;
+SYSCTL.validateClkStatus     = true;
 
 TIMER1.timerMode         = "PERIODIC";
 TIMER1.interrupts        = ["ZERO"];
