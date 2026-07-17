@@ -1,6 +1,6 @@
 /**
  * @file    imu.h
- * @brief   IMU attitude fusion interface.
+ * @brief   IMU 姿态融合接口
  */
 
 #ifndef __IMU_H
@@ -10,7 +10,7 @@
 #include <stdint.h>
 
 /**
- * @brief 3-axis float vector.
+ * @brief 三轴浮点向量
  */
 typedef struct {
     float x;
@@ -22,30 +22,29 @@ extern xyz_f_t north, west;
 extern volatile float yaw[5];
 
 /**
- * @brief Initialize ICM42688P and fusion state.
+ * @brief 初始化 ICM42688P 和姿态融合状态
  */
 void IMU_init(void);
 
 /**
- * @brief Sample IMU data and update attitude.
- * @note  This function is triggered by the ICM42688P data-ready interrupt.
+ * @brief 采样 IMU 数据并更新姿态
+ * @note  该函数由 ICM42688P 数据就绪中断触发
  */
 void IMU_sample(void);
 
 /**
- * @brief Handle the PA16 data-ready GPIO interrupt.
+ * @brief 处理 PA16 数据就绪 GPIO 中断
  */
 void IMU_dataReadyIrqHandler(void);
 
 /**
- * @brief Reset the IMU sample timestamp base.
+ * @brief 重置 IMU 采样时间基准
  */
 void IMU_resetTimestamp(void);
 
 /**
- * @brief  Get the latest yaw, pitch and roll angles.
- * @param  angles Output array, index 0/1/2 maps to yaw/pitch/roll in degrees.
- * @return None.
+ * @brief 获取最新的 yaw、pitch 和 roll 角度
+ * @param angles 输出数组，索引 0/1/2 分别对应 yaw/pitch/roll，单位为度
  */
 void IMU_getYawPitchRoll(float *angles);
 

@@ -1,27 +1,27 @@
 /**
  * @file    bsp_icm42688.c
- * @brief   ICM42688P SPI driver implementation.
+ * @brief   ICM42688P SPI 驱动实现
  */
 
 #include "bsp_icm42688.h"
 #include <stdio.h>
 
-/** @brief IMU chip-select low level. */
+/** @brief IMU 片选拉低 */
 #define ICM_CS_LOW()   DL_GPIO_clearPins(GPIO_IMU_CS_PORT, GPIO_IMU_CS_PB25_PIN)
-/** @brief IMU chip-select high level. */
+/** @brief IMU 片选拉高 */
 #define ICM_CS_HIGH()  DL_GPIO_setPins(GPIO_IMU_CS_PORT, GPIO_IMU_CS_PB25_PIN)
-/** @brief Busy-wait delay in milliseconds. */
+/** @brief 毫秒级忙等待延时 */
 #define ICM_DELAY_MS(ms)  delay_cycles((ms) * (CPUCLK_FREQ / 1000))
 
-/** @brief Current accelerometer sensitivity in g/LSB. */
+/** @brief 当前加速度计灵敏度，单位 g/LSB */
 static float Acc_Sensitivity = 4.0f / 32768.0f;
-/** @brief Current gyroscope sensitivity in dps/LSB. */
+/** @brief 当前陀螺仪灵敏度，单位 dps/LSB */
 static float Gyro_Sensitivity = 1000.0f / 32768.0f;
 
 /**
- * @brief  Transfer one byte over SPI.
- * @param  tx_data Byte to transmit.
- * @return Received byte.
+ * @brief 通过 SPI 发送和接收 1 字节
+ * @param tx_data 待发送字节
+ * @return 接收到的字节
  */
 static uint8_t SPI_ReadWriteByte(uint8_t tx_data)
 {
@@ -34,9 +34,9 @@ static uint8_t SPI_ReadWriteByte(uint8_t tx_data)
 }
 
 /**
- * @brief  Read one register.
- * @param  addr Register address.
- * @return Register value.
+ * @brief 读取一个寄存器
+ * @param addr 寄存器地址
+ * @return 寄存器值
  */
 static uint8_t ICM_Read_A_Byte(uint8_t addr)
 {
@@ -51,10 +51,10 @@ static uint8_t ICM_Read_A_Byte(uint8_t addr)
 }
 
 /**
- * @brief  Read a register block.
- * @param  addr Start address.
- * @param  buffer Destination buffer.
- * @param  len Read length in bytes.
+ * @brief 读取一段寄存器块
+ * @param addr 起始地址
+ * @param buffer 目标缓冲区
+ * @param len 读取长度，单位字节
  */
 static void ICM_Read_Bytes(uint8_t addr, uint8_t *buffer, uint8_t len)
 {
@@ -69,10 +69,10 @@ static void ICM_Read_Bytes(uint8_t addr, uint8_t *buffer, uint8_t len)
 }
 
 /**
- * @brief  Write one register.
- * @param  addr Register address.
- * @param  data Register value.
- * @return Always returns 0.
+ * @brief 写入一个寄存器
+ * @param addr 寄存器地址
+ * @param data 寄存器值
+ * @return 始终返回 0
  */
 static uint8_t ICM_Write_A_Byte(uint8_t addr, uint8_t data)
 {
@@ -85,17 +85,17 @@ static uint8_t ICM_Write_A_Byte(uint8_t addr, uint8_t data)
 }
 
 /**
- * @brief Configure data-ready interrupt output on INT1.
- * @return Always returns 0.
+ * @brief 配置 INT1 的数据就绪中断输出
+ * @return 始终返回 0
  */
 int8_t bsp_IcmConfigDataReadyInt(void)
 {
-    /* INT1: push-pull, active high, pulse mode. */
+    /* INT1：推挽、有效高、脉冲模式 */
     ICM_Write_A_Byte(ICM42688_INT_CONFIG, ICM42688_INT1_POLARITY_HIGH);
-    /* Use the default async reset behavior and route UI data-ready only. */
+    /* 使用默认异步复位行为，仅路由 UI 数据就绪中断 */
     ICM_Write_A_Byte(ICM42688_INT_CONFIG1, 0x00U);
     ICM_Write_A_Byte(ICM42688_INT_SOURCE0, ICM42688_UI_DRDY_INT1_EN);
-    /* Read once to clear any stale status after configuration. */
+    /* 配置后读一次，清除可能残留的状态 */
     (void) ICM_Read_A_Byte(ICM42688_INT_STATUS);
 
     return 0;
@@ -134,7 +134,7 @@ uint8_t ICM_Init(void)
 
     ICM_Write_A_Byte(ICM42688_GYRO_ACCEL_CONFIG0, 0x44U);
 
-    /* Enable temperature, gyro and accel in low-noise mode. */
+    /* 使能温度、陀螺仪和加速度计，进入低噪声模式 */
     temp = ICM_Read_A_Byte(ICM42688_PWR_MGMT0);
     temp &= (uint8_t)~(1U << 5);
     temp &= (uint8_t)~0x0FU;

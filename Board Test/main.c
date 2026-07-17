@@ -28,10 +28,11 @@ int main(void)
 
         /* 根据选择分发任务（各任务内部含死循环，返回后重回菜单） */
         switch (task) {
-            case TASK_1: BSP_Test_IMU();        break;
+            case TASK_1: BSP_Test_PID();        break;
             case TASK_2: BSP_Test_Encoder();    break;
             case TASK_3: BSP_Test_Motor();      break;
-            case TASK_4: BSP_Test_OLED();       break;
+            case TASK_4: BSP_Test_IMU();        break;
+            case TASK_5: BSP_Test_OLED();       break;
             default:                            break;
         }
     }

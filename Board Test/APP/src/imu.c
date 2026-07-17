@@ -1,6 +1,6 @@
 /**
  * @file    imu.c
- * @brief   IMU attitude estimation based on Mahony AHRS.
+ * @brief   基于 Mahony AHRS 的 IMU 姿态估计
  */
 
 #include "imu.h"
@@ -9,63 +9,63 @@
 #include <stdio.h>
 #include <string.h>
 
-/** @brief IMU sample period derived from ICM42688P 200 Hz ODR. */
+/** @brief 由 ICM42688P 200 Hz 输出数据率换算得到的采样周期 */
 #define IMU_SAMPLE_PERIOD_S       (0.005f)
-/** @brief Half sample period used by quaternion integration. */
+/** @brief 四元数积分使用的半采样周期 */
 #define IMU_HALF_SAMPLE_PERIOD_S  (IMU_SAMPLE_PERIOD_S * 0.5f)
-/** @brief Gyro offset window size. */
+/** @brief 陀螺仪零偏估计窗口大小 */
 #define GYRO_CAL_SAMPLES          (100U)
-/** @brief Stationary variance threshold in dps^2. */
+/** @brief 静止方差阈值，单位 dps^2 */
 #define GYRO_STABLE_VAR_TH        (0.01f)
-/** @brief Mahony proportional gain. */
+/** @brief Mahony 比例系数 */
 #define Kp                        (0.6f)
-/** @brief Mahony integral gain. */
+/** @brief Mahony 积分系数 */
 #define Ki                        (0.001f)
 
-/** @brief Latest accelerometer sample in g. */
+/** @brief 最新的加速度计采样值，单位 g */
 icm42688_real_data_t accval;
-/** @brief Latest gyroscope sample in dps. */
+/** @brief 最新的陀螺仪采样值，单位 dps */
 icm42688_real_data_t gyroval;
-/** @brief Sample tick counter, 1 tick = 1 IMU data-ready event. */
+/** @brief 采样节拍计数器，1 tick 对应 1 次 IMU 数据就绪事件 */
 volatile uint32_t nowtime = 0;
 
 xyz_f_t north, west;
 volatile float yaw[5] = {0.0f};
 
-/** @brief Mahony integral error terms. */
+/** @brief Mahony 积分误差项 */
 static volatile float exInt;
 static volatile float eyInt;
 static volatile float ezInt;
-/** @brief Current attitude quaternion. */
+/** @brief 当前姿态四元数 */
 static volatile float q0;
 static volatile float q1;
 static volatile float q2;
 static volatile float q3;
-/** @brief Sample tick used by the last AHRS update. */
+/** @brief 上一次 AHRS 更新使用的节拍值 */
 static volatile uint32_t lastUpdate;
 static volatile uint32_t now;
-/** @brief Cached Euler angles in yaw, pitch, roll order. */
+/** @brief 缓存的欧拉角，顺序为 yaw、pitch、roll */
 static volatile float ypr[3];
-/** @brief Set after gyro offset has a stable stationary estimate. */
+/** @brief 陀螺仪零偏完成稳定估计后的标志 */
 static volatile uint8_t imu_ready;
 
-/** @brief Rolling gyro window for offset estimation. */
+/** @brief 用于零偏估计的滚动陀螺窗口 */
 static double gyro_hist[3][GYRO_CAL_SAMPLES];
-/** @brief Rolling gyro sum. */
+/** @brief 滚动陀螺总和 */
 static double gyro_sum[3];
-/** @brief Rolling gyro squared sum. */
+/** @brief 滚动陀螺平方和 */
 static double gyro_sqr_sum[3];
-/** @brief Gyro calibration offset in dps. */
+/** @brief 陀螺仪标定零偏，单位 dps */
 static float gyro_offset[3];
-/** @brief Rolling window write index. */
+/** @brief 滚动窗口写索引 */
 static uint16_t gyro_idx;
-/** @brief Window filled flag. */
+/** @brief 窗口填满标志 */
 static uint8_t gyro_win_ready;
 
 /**
- * @brief  Fast inverse square root.
- * @param  x Input value.
- * @return 1 / sqrt(x).
+ * @brief 快速反平方根
+ * @param x 输入值
+ * @return 1 / sqrt(x)
  */
 static float invSqrt(float x)
 {
@@ -81,11 +81,11 @@ static float invSqrt(float x)
 }
 
 /**
- * @brief  Clamp a value to a closed interval.
- * @param  val Input value.
- * @param  min Lower bound.
- * @param  max Upper bound.
- * @return Clamped value.
+ * @brief 将数值限制到闭区间
+ * @param val 输入值
+ * @param min 下限
+ * @param max 上限
+ * @return 限幅后的数值
  */
 static float imu_clampf(float val, float min, float max)
 {
@@ -99,7 +99,7 @@ static float imu_clampf(float val, float min, float max)
 }
 
 /**
- * @brief Reset quaternion and integration state.
+ * @brief 重置四元数与积分状态
  */
 static void IMU_resetFusion(void)
 {
@@ -116,10 +116,10 @@ static void IMU_resetFusion(void)
 }
 
 /**
- * @brief  Update gyro variance over a rolling stationary window.
- * @param  data Current gyro sample in dps.
- * @param  var Output variance for xyz axes.
- * @param  avg Output average for xyz axes.
+ * @brief 在滚动静止窗口内更新陀螺仪方差
+ * @param data 当前陀螺仪采样值，单位 dps
+ * @param var 输出的 xyz 轴方差
+ * @param avg 输出的 xyz 轴平均值
  */
 static void calGyroVariance(const float data[3], float var[3], float avg[3])
 {
@@ -162,14 +162,14 @@ static void calGyroVariance(const float data[3], float var[3], float avg[3])
 }
 
 /**
- * @brief  Update quaternion with Mahony 6-axis fusion.
- * @param  gx Gyro x in rad/s.
- * @param  gy Gyro y in rad/s.
- * @param  gz Gyro z in rad/s.
- * @param  ax Acc x in g.
- * @param  ay Acc y in g.
- * @param  az Acc z in g.
- * @param  halfT Half of the integration period in seconds.
+ * @brief 使用 Mahony 6 轴融合更新四元数
+ * @param gx 陀螺仪 x 轴角速度，单位 rad/s
+ * @param gy 陀螺仪 y 轴角速度，单位 rad/s
+ * @param gz 陀螺仪 z 轴角速度，单位 rad/s
+ * @param ax 加速度 x 轴，单位 g
+ * @param ay 加速度 y 轴，单位 g
+ * @param az 加速度 z 轴，单位 g
+ * @param halfT 半个积分周期，单位秒
  */
 static void IMU_AHRSupdate(float gx, float gy, float gz,
                            float ax, float ay, float az, float halfT)
@@ -236,7 +236,7 @@ static void IMU_AHRSupdate(float gx, float gy, float gz,
 }
 
 /**
- * @brief Update cached Euler angles from the current quaternion.
+ * @brief 根据当前四元数更新缓存的欧拉角
  */
 static void IMU_updateYpr(void)
 {

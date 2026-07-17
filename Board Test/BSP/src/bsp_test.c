@@ -1,6 +1,6 @@
 /**
  * @file    bsp_test.c
- * @brief   BSP test entry implementations.
+ * @brief   BSP 测试入口实现
  */
 
 #include "bsp_test.h"
@@ -10,13 +10,23 @@
 #include "bsp_key.h"
 #include "bsp_motor.h"
 #include "imu.h"
+#include "pid.h"
 #include "ui.h"
 #include <stdio.h>
 
-static void LED1_On(void)
-{
-    DL_GPIO_setPins(GPIO_LED_LED1_PORT, GPIO_LED_LED1_PIN);
-}
+/* 左右轮保留独立 PID 参数，后续可单独微调 */
+#define PID_L_KP            40.0f
+#define PID_L_KI            3.0f
+#define PID_L_KD            1.0f
+#define PID_R_KP            30.0f
+#define PID_R_KI            1.0f
+#define PID_R_KD            1.0f
+#define PID_TUNE_STEP       3
+#define PID_TUNE_MAX        100
+#define PID_TUNE_MIN        0
+#define MOTOR_DUTY_STEP     200
+#define MOTOR_DUTY_MAX      MOTOR_PWM_PERIOD
+#define MOTOR_DUTY_MIN      (-MOTOR_PWM_PERIOD)
 
 static void LED1_Off(void)
 {
@@ -33,70 +43,134 @@ static void LED2_Off(void)
     DL_GPIO_clearPins(GPIO_LED_LED2_PORT, GPIO_LED_LED2_PIN);
 }
 
-static void LED_Blink(uint8_t count, uint32_t ms)
-{
-    for (uint8_t i = 0; i < count; i++) {
-        LED1_On();
-        LED2_On();
-        delay_ms(ms);
-        LED1_Off();
-        LED2_Off();
-        delay_ms(ms);
-    }
-}
-
 /**
- * @brief  Drive a single motor forward and reverse once.
- * @param  motor Motor selector.
- * @return Always returns 0 and relies on manual observation.
- */
-static uint8_t test_single_motor(Motor_ID motor)
-{
-    Motor_SetDuty(motor, 2000);
-    delay_ms(2000);
-    Motor_Stop(motor);
-    delay_ms(500);
-
-    Motor_SetDuty(motor, -2000);
-    delay_ms(2000);
-    Motor_Stop(motor);
-    delay_ms(500);
-
-    return 0;
-}
-
-/**
- * @brief Convert encoder direction enum to a compact log string.
- * @param dir Encoder direction.
- * @return Direction string.
+ * @brief 将编码器方向枚举转换为紧凑日志字符串
+ * @param dir 编码器方向
+ * @return 方向字符串
  */
 static const char *encoder_dir_str(ENCODER_DIR dir)
 {
     return (dir == FORWARD) ? "F" : "R";
 }
 
+/**
+ * @brief 单次按键动作后等待所有按键松开
+ */
+static void test_wait_key_release(void)
+{
+    while (Key_Scan() != -1) {
+        delay_ms(10);
+    }
+}
+
+/**
+ * @brief 将整数限制到闭区间
+ * @param val 输入值
+ * @param min 下限
+ * @param max 上限
+ * @return 限幅后的数值
+ */
+static int test_limit_int(int val, int min, int max)
+{
+    if (val > max) {
+        return max;
+    }
+
+    if (val < min) {
+        return min;
+    }
+
+    return val;
+}
+
+/**
+ * @brief 将编码器 ID 转成调参界面使用的轮子名称
+ * @param id 编码器选择
+ * @return 轮子名称
+ */
+static const char *pid_wheel_name(ENCODER_ID id)
+{
+    return (id == ENCODER_1) ? "Left" : "Right";
+}
+
+/**
+ * @brief 将编码器 ID 映射为对应电机
+ * @param id 编码器选择
+ * @return 电机选择
+ */
+static Motor_ID pid_motor_of(ENCODER_ID id)
+{
+    return (id == ENCODER_1) ? MOTOR_A : MOTOR_B;
+}
+
+/**
+ * @brief 选择要整定的轮子
+ * @return 被选择的编码器 ID
+ */
+static ENCODER_ID pid_select_wheel(void)
+{
+    uint8_t left = 1U;
+    int8_t key;
+
+    while (1) {
+        UI_Test_PIDSelect(left);
+
+        do {
+            key = Key_Scan();
+        } while (key == -1);
+
+        test_wait_key_release();
+
+        if (key == KEY_1 || key == KEY_2) {
+            left ^= 1U;
+        } else if (key == KEY_3) {
+            return left ? ENCODER_1 : ENCODER_2;
+        }
+    }
+}
+
+/**
+ * @brief 带 OLED 编码器反馈的电机 PWM 占空比测试
+ * @details KEY1 增加占空比，KEY2 减少占空比，KEY3 清零占空比
+ */
 void BSP_Test_Motor(void)
 {
-    uint8_t result_a;
-    uint8_t result_b;
+    int8_t key;
+    int duty = 0;
+    int e1 = 0;
+    int e2 = 0;
 
-    Motor_Init();
+    UI_Init();
     encoder_init();
+    Motor_Init();
 
-    LED_Blink(1, 200);
-    delay_ms(200);
+    UI_Test_Motor(duty, e1, e2);
 
-    result_a = test_single_motor(MOTOR_A);
-    if (result_a == 0U) {
-        LED1_On();
+    while (1) {
+        key = Key_Scan();
+        if (key != -1) {
+            if (key == KEY_1) {
+                duty += MOTOR_DUTY_STEP;
+            } else if (key == KEY_2) {
+                duty -= MOTOR_DUTY_STEP;
+            } else if (key == KEY_3) {
+                duty = 0;
+            }
+
+            duty = test_limit_int(duty, MOTOR_DUTY_MIN, MOTOR_DUTY_MAX);
+            test_wait_key_release();
+        }
+
+        Motor_SetDuty(MOTOR_A, (int16_t)duty);
+        Motor_SetDuty(MOTOR_B, (int16_t)duty);
+
+        e1 = encoder_get_count(ENCODER_1);
+        e2 = encoder_get_count(ENCODER_2);
+
+        UI_Test_Motor(duty, e1, e2);
+        lc_printf("Motor duty:%d e1:%d e2:%d\r\n", duty, e1, e2);
+        delay_ms(50);
     }
-    delay_ms(1000);
-
-    result_b = test_single_motor(MOTOR_B);
-    if (result_b == 0U) {
-        LED2_On();
-    }
-    delay_ms(1000);
 }
 
 void BSP_Test_OLED(void)
@@ -161,11 +235,11 @@ void BSP_Test_KEY(void)
     }
 }
 
-/** @brief IMU sample tick exposed by imu.c. */
+/** @brief imu.c 暴露的 IMU 采样节拍 */
 extern volatile uint32_t nowtime;
-/** @brief Latest accelerometer sample exposed by imu.c. */
+/** @brief imu.c 暴露的最新加速度计采样值 */
 extern icm42688_real_data_t accval;
-/** @brief Latest gyroscope sample exposed by imu.c. */
+/** @brief imu.c 暴露的最新陀螺仪采样值 */
 extern icm42688_real_data_t gyroval;
 
 void BSP_Test_IMU(void)
@@ -194,5 +268,77 @@ void BSP_Test_IMU(void)
         IMU_getYawPitchRoll(angles);
         UI_Test_IMU(angles);
         lc_printf("P R Y:%.2f , %.2f , %.2f\n", angles[1], angles[2], angles[0]);
+    }
+}
+/**
+ * @brief 带 OLED 反馈和按键目标调节的 PID 控速测试
+ */
+void BSP_Test_PID(void)
+{
+    PID pid_l;
+    PID pid_r;
+    PID *pid;
+    ENCODER_ID enc_id;
+    Motor_ID motor_id;
+    Motor_ID motor_off;
+    const char *wheel;
+    int set = 0;
+    int actual = 0;
+    int out = 0;
+    int8_t key;
+
+    UI_Init();
+
+    enc_id = pid_select_wheel();
+    motor_id = pid_motor_of(enc_id);
+    motor_off = (motor_id == MOTOR_A) ? MOTOR_B : MOTOR_A;
+    wheel = pid_wheel_name(enc_id);
+
+    encoder_init();
+    Motor_Init();
+    PID_Init(&pid_l, PID_L_KP, PID_L_KI, PID_L_KD,
+             (float)(-MOTOR_PWM_PERIOD), (float)MOTOR_PWM_PERIOD);
+    PID_Init(&pid_r, PID_R_KP, PID_R_KI, PID_R_KD,
+             (float)(-MOTOR_PWM_PERIOD), (float)MOTOR_PWM_PERIOD);
+
+    pid = (enc_id == ENCODER_1) ? &pid_l : &pid_r;
+    Motor_Stop(motor_off);
+    Motor_Stop(motor_id);
+
+    UI_Test_PID(wheel, actual, set, out);
+
+    while (1) {
+        key = Key_Scan();
+        if (key != -1) {
+            if (key == KEY_1) {
+                set += PID_TUNE_STEP;
+            } else if (key == KEY_2) {
+                set -= PID_TUNE_STEP;
+            } else if (key == KEY_3) {
+                set = 0;
+                PID_Reset(pid);
+                Motor_Stop(motor_id);
+            }
+
+            set = test_limit_int(set, PID_TUNE_MIN, PID_TUNE_MAX);
+            test_wait_key_release();
+        }
+
+        actual = encoder_get_count(enc_id);
+        if (set == 0) {
+            out = 0;
+            Motor_Stop(motor_id);
+        } else {
+            out = (int)PID_CalcTarget(pid, (float)set, (float)actual);
+            out = test_limit_int(out, MOTOR_DUTY_MIN, MOTOR_DUTY_MAX);
+            Motor_SetDuty(motor_id, (int16_t)out);
+        }
+
+        Motor_Stop(motor_off);
+
+        UI_Test_PID(wheel, actual, set, out);
+        lc_printf("PID[%s] actual:%d target:%d out:%d\r\n",
+                  wheel, actual, set, out);
+        delay_ms(50);
     }
 }

@@ -15,8 +15,11 @@
 
 /** 一级菜单各项名称，顺序对应 Task_ID */
 static const char *TASK_NAMES[TASK_COUNT] = {
-    "TASK1", "TASK2", "TASK3", "TASK4"
+    "PID", "ENC", "MOTOR", "IMU", "OLED"
 };
+
+/** @brief 64px OLED 下 16px 字体可见的最大菜单行数 */
+#define MENU_ROWS 4
 
 /* ------------------------------------------------------------------ */
 /*  内部辅助                                                            */
@@ -32,9 +35,9 @@ static void wait_release(void)
 }
 
 /**
- * @brief Draw the menu cursor at a fixed row.
- * @param y      Row start coordinate.
- * @param active 1=selected, 0=not selected.
+ * @brief 在固定行绘制菜单光标
+ * @param y 行起始坐标
+ * @param active 1=选中，0=未选中
  */
 static void show_cursor(u8 y, uint8_t active)
 {
@@ -48,8 +51,8 @@ static void show_cursor(u8 y, uint8_t active)
 }
 
 /**
- * @brief Clear one 16px-high text row without writing outside the OLED width.
- * @param y Row start coordinate.
+ * @brief 清空一行 16px 高度文本，不越界写入 OLED 宽度之外
+ * @param y 行起始坐标
  */
 static void clear_text_row(u8 y)
 {
@@ -93,6 +96,55 @@ void UI_Test_Encoder(int e1, int e2)
     OLED_Refresh();
 }
 
+void UI_Test_Motor(int duty, int e1, int e2)
+{
+    char buf[17];
+
+    clear_text_row(0);
+    clear_text_row(16);
+    clear_text_row(32);
+    clear_text_row(48);
+
+    OLED_ShowString(0, 0, (u8 *)"Motor Duty", 16, 1);
+    (void)snprintf(buf, sizeof(buf), "Duty:%+5d", duty);
+    OLED_ShowString(0, 16, (u8 *)buf, 16, 1);
+    (void)snprintf(buf, sizeof(buf), "E1:%+7d", e1);
+    OLED_ShowString(0, 32, (u8 *)buf, 16, 1);
+    (void)snprintf(buf, sizeof(buf), "E2:%+7d", e2);
+    OLED_ShowString(0, 48, (u8 *)buf, 16, 1);
+    OLED_Refresh();
+}
+
+void UI_Test_PIDSelect(uint8_t left)
+{
+    OLED_Clear();
+    OLED_ShowString(0, 0, (u8 *)"PID Tune", 16, 1);
+    OLED_ShowString(0, 16, (u8 *)"Wheel:", 16, 1);
+    OLED_ShowString(56, 16, (u8 *)(left ? "Left" : "Right"), 16, 1);
+    OLED_ShowString(0, 32, (u8 *)"KEY1/2 Swap", 16, 1);
+    OLED_ShowString(0, 48, (u8 *)"KEY3 OK", 16, 1);
+    OLED_Refresh();
+}
+
+void UI_Test_PID(const char *wheel, int actual, int target, int output)
+{
+    char buf[24];
+
+    clear_text_row(0);
+    clear_text_row(16);
+    clear_text_row(32);
+    clear_text_row(48);
+
+    OLED_ShowString(0, 0, (u8 *)"PID Tune", 16, 1);
+    (void)snprintf(buf, sizeof(buf), "Wheel:%s", wheel);
+    OLED_ShowString(0, 16, (u8 *)buf, 16, 1);
+    (void)snprintf(buf, sizeof(buf), "A:%+4d T:%+4d", actual, target);
+    OLED_ShowString(0, 32, (u8 *)buf, 16, 1);
+    (void)snprintf(buf, sizeof(buf), "O:%+5d", output);
+    OLED_ShowString(0, 48, (u8 *)buf, 16, 1);
+    OLED_Refresh();
+}
+
 void UI_IMU_Calibrating(void)
 {
     OLED_Clear();
@@ -116,7 +168,7 @@ static void show_float(u8 x, u8 y, float val)
 
 /**
  * @brief 刷新 IMU 三轴姿态角到 OLED
- * @param angles  float[3]：[0]=Yaw, [1]=Pitch, [2]=Roll
+ * @param angles  float[3]：[0]=航向角, [1]=俯仰角, [2]=横滚角
  * @note  显示格式：Y:+xxx.xx / P:+xxx.xx / R:+xxx.xx
  */
 void UI_Test_IMU(float *angles)
@@ -125,15 +177,15 @@ void UI_Test_IMU(float *angles)
 
     clear_text_row(0);
     OLED_ShowString(0, 0, (u8 *)"P:", 16, 1);
-    show_float(16, 0, angles[1]);   /* Pitch */
+    show_float(16, 0, angles[1]);   /* 俯仰角 */
 
     clear_text_row(22);
     OLED_ShowString(0, 22, (u8 *)"R:", 16, 1);
-    show_float(16, 22, angles[2]);   /* Roll  */
+    show_float(16, 22, angles[2]);   /* 横滚角 */
 
     clear_text_row(44);
     OLED_ShowString(0, 44, (u8 *)"Y:", 16, 1);
-    show_float(16, 44,  angles[0]);   /* Yaw   */
+    show_float(16, 44,  angles[0]);   /* 航向角 */
 
     OLED_Refresh();
 }
@@ -150,19 +202,32 @@ void UI_Test_IMU(float *angles)
 static Task_ID UI_Menu_L1(void)
 {
     int8_t  cur = 0;   /* 当前光标位置 0-3 */
+    int8_t  first = 0;
     int8_t  key;
 
     while (1) {
+        if (cur < first) {
+            first = cur;
+        } else if (cur >= (first + MENU_ROWS)) {
+            first = cur - MENU_ROWS + 1;
+        }
+
         /* --- 刷新显示 --- */
         OLED_Clear();
-        for (int8_t i = 0; i < TASK_COUNT; i++) {
+        for (int8_t row = 0; row < MENU_ROWS; row++) {
+            int8_t i = first + row;
+
+            if (i >= TASK_COUNT) {
+                break;
+            }
+
             /* 光标字符：选中行显示 '>'，其余显示 ' ' */
             if (cur == i) {
-                show_cursor((u8)(i * 16), 1U);
+                show_cursor((u8)(row * 16), 1U);
             } else {
-                show_cursor((u8)(i * 16), 0U);
+                show_cursor((u8)(row * 16), 0U);
             }
-            OLED_ShowString(8, (u8)(i * 16), (u8 *)TASK_NAMES[i], 16, 1);
+            OLED_ShowString(8, (u8)(row * 16), (u8 *)TASK_NAMES[i], 16, 1);
         }
         OLED_Refresh();
 
@@ -190,12 +255,12 @@ static Task_ID UI_Menu_L1(void)
 /**
  * @brief 显示并处理二级确认菜单
  * @param task  从一级菜单传入的选中任务
- * @details 默认光标在"OK"。KEY1/KEY2 切换，KEY3 确认。
+ * @details 默认光标在确认项。KEY1/KEY2 切换，KEY3 确认。
  * @return 1=用户确认, 0=用户取消
  */
 static uint8_t UI_Menu_L2(Task_ID task)
 {
-    uint8_t sel = 0;   /* 0=OK, 1=Cancel；默认指向 OK */
+    uint8_t sel = 0;   /* 0=确认，1=取消；默认指向确认 */
     int8_t  key;
 
     while (1) {
@@ -203,14 +268,14 @@ static uint8_t UI_Menu_L2(Task_ID task)
         OLED_Clear();
         OLED_ShowString(0, 0,  (u8 *)TASK_NAMES[task], 16, 1);   /* 任务名 */
         OLED_ShowString(0, 16, (u8 *)"  Selected?",     16, 1);   /* 副标题 */
-        /* OK 行 */
+        /* 确认行 */
         if (sel == 0U) {
             show_cursor(32, 1U);
         } else {
             show_cursor(32, 0U);
         }
         OLED_ShowString(8, 32, (u8 *)"[OK]",            16, 1);
-        /* Cancel 行 */
+        /* 取消行 */
         if (sel == 1U) {
             show_cursor(48, 1U);
         } else {
@@ -224,7 +289,7 @@ static uint8_t UI_Menu_L2(Task_ID task)
         wait_release();
 
         if (key == KEY_1 || key == KEY_2) {
-            /* 在 OK / Cancel 之间切换 */
+            /* 在确认和取消之间切换 */
             sel ^= 1;
         } else if (key == KEY_3) {
             if (sel == 0U) {
@@ -248,8 +313,8 @@ Task_ID UI_Process(void)
     while (1) {
         Task_ID sel = UI_Menu_L1();
         if (UI_Menu_L2(sel)) {
-            return sel;   /* 用户在二级菜单选了 OK */
+            return sel;   /* 用户在二级菜单选了确认 */
         }
-        /* 用户在二级菜单选了 Cancel，回到一级菜单 */
+        /* 用户在二级菜单选了取消，回到一级菜单 */
     }
 }

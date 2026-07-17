@@ -18,6 +18,10 @@
  *   5. 任一失败：对应LED常灭
  */
 
+/**
+ * @brief 带 OLED 编码器反馈的电机 PWM 占空比测试
+ * @details KEY1 增加占空比，KEY2 减少占空比，KEY3 清零占空比
+ */
 void BSP_Test_Motor(void);
 
 /**
@@ -57,12 +61,24 @@ void BSP_Test_KEY(void);
 void BSP_Test_Encoder(void);
 
 /**
+ * @brief 带 OLED 反馈和按键目标调节的 PID 控速测试
+ *
+ * 测试流程：
+ *   1. 先选择左轮或右轮
+ *   2. 仅控制所选轮子，另一轮保持停止
+ *   3. KEY1/KEY2 调整设定速度，KEY3 清零并停止
+ *   4. 串口输出实际速度、设定速度和 PID 输出
+ *   5. OLED 显示轮子名、实际速度、设定速度和 PID 输出
+ */
+void BSP_Test_PID(void);
+
+/**
  * @brief IMU三轴数据测试
  *
  * 测试流程：
  *   1. 初始化ICM42688与OLED
  *   2. OLED实时显示原始六轴数据(陀螺仪角速度dps + 加速度g)
- *   3. 串口持续输出姿态角 Pitch / Roll / Yaw
+ *   3. 串口持续输出姿态角 俯仰角 / 横滚角 / 航向角
  *   4. 初始化失败时OLED与串口均报错提示
  */
 void BSP_Test_IMU(void);

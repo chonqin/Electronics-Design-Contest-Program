@@ -1,6 +1,6 @@
 /**
  * @file    test_icm42688.c
- * @brief   ICM42688P driver test helpers.
+ * @brief   ICM42688P 驱动测试辅助函数
  */
 
 #include "ti_msp_dl_config.h"
@@ -9,11 +9,11 @@
 #include "imu.h"
 #include <stdio.h>
 
-/** @brief IMU sample tick exported by imu.c. */
+/** @brief 由 imu.c 导出的 IMU 采样节拍 */
 extern uint32_t nowtime;
 
 /**
- * @brief Test device ID communication.
+ * @brief 测试设备 ID 通信
  */
 void test_read_id(void)
 {
@@ -27,7 +27,7 @@ void test_read_id(void)
 }
 
 /**
- * @brief Test scaled sensor data reads.
+ * @brief 测试换算后的传感器数据读取
  */
 void test_read_raw_data(void)
 {
@@ -51,8 +51,8 @@ void test_read_raw_data(void)
 }
 
 /**
- * @brief Test the AHRS result with data-ready interrupt sampling.
- * @note  Keep INT1 routed to PA16 and call IMU_dataReadyIrqHandler() in GROUP1_IRQHandler().
+ * @brief 通过数据就绪中断采样测试 AHRS 结果
+ * @note 保持 INT1 路由到 PA16，并在 GROUP1_IRQHandler() 中调用 IMU_dataReadyIrqHandler()
  */
 void test_attitude(void)
 {
@@ -80,7 +80,7 @@ void test_attitude(void)
 }
 
 /**
- * @brief Main entry for the standalone ICM42688P tests.
+ * @brief 独立 ICM42688P 测试入口
  */
 void icm42688_test_main(void)
 {
@@ -95,7 +95,7 @@ void icm42688_test_main(void)
     test_read_raw_data();
     delay_ms(1000);
 
-    /* Uncomment when the PA16 data-ready interrupt path is active. */
+    /* 当 PA16 数据就绪中断路径启用后再取消注释 */
     /* test_attitude(); */
 
     printf("\r\n========================================\r\n");
@@ -104,7 +104,7 @@ void icm42688_test_main(void)
 }
 
 /**
- * @brief Example GPIO data-ready ISR hook.
+ * @brief GPIO 数据就绪中断示例入口
  */
 void IMU_GPIO_ISR_Example(void)
 {

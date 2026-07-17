@@ -90,7 +90,7 @@ void OLED_Refresh(void)
 		OLED_WR_Byte(0x00,OLED_CMD);   //设置低列起始地址
 		OLED_WR_Byte(0x10,OLED_CMD);   //设置高列起始地址
 
-        /* OLED_WR_Byte() already sends the data control byte, so only GRAM is written here. */
+        /* OLED_WR_Byte() 已经发送数据控制字节，这里只写入显存数据 */
 		for(n=0;n<128;n++)
 		{
 			OLED_WR_Byte(OLED_GRAM[n][i], OLED_DATA);
@@ -398,31 +398,31 @@ void OLED_ShowPicture(u8 x,u8 y,u8 sizex,u8 sizey,u8 BMP[],u8 mode)
 //OLED的初始化
 void OLED_Init(void)
 {
-	OLED_WR_Byte(0xAE,OLED_CMD);//--turn off oled panel
-	OLED_WR_Byte(0x00,OLED_CMD);//---set low column address
-	OLED_WR_Byte(0x10,OLED_CMD);//---set high column address
-	OLED_WR_Byte(0x40,OLED_CMD);//--set start line address  Set Mapping RAM Display Start Line (0x00~0x3F)
-	OLED_WR_Byte(0x81,OLED_CMD);//--set contrast control register
-	OLED_WR_Byte(0xCF,OLED_CMD);// Set SEG Output Current Brightness
-	OLED_WR_Byte(0xA1,OLED_CMD);//--Set SEG/Column Mapping     0xa0左右反置 0xa1正常
-	OLED_WR_Byte(0xC8,OLED_CMD);//Set COM/Row Scan Direction   0xc0上下反置 0xc8正常
-	OLED_WR_Byte(0xA6,OLED_CMD);//--set normal display
-	OLED_WR_Byte(0xA8,OLED_CMD);//--set multiplex ratio(1 to 64)
-	OLED_WR_Byte(0x3f,OLED_CMD);//--1/64 duty
-	OLED_WR_Byte(0xD3,OLED_CMD);//-set display offset	Shift Mapping RAM Counter (0x00~0x3F)
-	OLED_WR_Byte(0x00,OLED_CMD);//-not offset
-	OLED_WR_Byte(0xd5,OLED_CMD);//--set display clock divide ratio/oscillator frequency
-	OLED_WR_Byte(0x80,OLED_CMD);//--set divide ratio, Set Clock as 100 Frames/Sec
-	OLED_WR_Byte(0xD9,OLED_CMD);//--set pre-charge period
-	OLED_WR_Byte(0xF1,OLED_CMD);//Set Pre-Charge as 15 Clocks & Discharge as 1 Clock
-	OLED_WR_Byte(0xDA,OLED_CMD);//--set com pins hardware configuration
+	OLED_WR_Byte(0xAE,OLED_CMD);//关闭 OLED 面板
+	OLED_WR_Byte(0x00,OLED_CMD);//设置低列地址
+	OLED_WR_Byte(0x10,OLED_CMD);//设置高列地址
+	OLED_WR_Byte(0x40,OLED_CMD);//设置显示起始行地址（0x00~0x3F）
+	OLED_WR_Byte(0x81,OLED_CMD);//设置对比度控制寄存器
+	OLED_WR_Byte(0xCF,OLED_CMD);//设置 SEG 输出电流亮度
+	OLED_WR_Byte(0xA1,OLED_CMD);//设置 SEG/列映射，0xa0 左右反置，0xa1 正常
+	OLED_WR_Byte(0xC8,OLED_CMD);//设置 COM/行扫描方向，0xc0 上下反置，0xc8 正常
+	OLED_WR_Byte(0xA6,OLED_CMD);//设置正常显示
+	OLED_WR_Byte(0xA8,OLED_CMD);//设置复用比（1 到 64）
+	OLED_WR_Byte(0x3f,OLED_CMD);//1/64 占空比
+	OLED_WR_Byte(0xD3,OLED_CMD);//设置显示偏移（0x00~0x3F）
+	OLED_WR_Byte(0x00,OLED_CMD);//无偏移
+	OLED_WR_Byte(0xd5,OLED_CMD);//设置显示时钟分频比和振荡频率
+	OLED_WR_Byte(0x80,OLED_CMD);//设置分频比，显示时钟约 100 帧/秒
+	OLED_WR_Byte(0xD9,OLED_CMD);//设置预充电周期
+	OLED_WR_Byte(0xF1,OLED_CMD);//预充电 15 个时钟，放电 1 个时钟
+	OLED_WR_Byte(0xDA,OLED_CMD);//设置 COM 引脚硬件配置
 	OLED_WR_Byte(0x12,OLED_CMD);
-	OLED_WR_Byte(0xDB,OLED_CMD);//--set vcomh
-	OLED_WR_Byte(0x30,OLED_CMD);//Set VCOM Deselect Level
-	OLED_WR_Byte(0x20,OLED_CMD);//-Set Page Addressing Mode (0x00/0x01/0x02)
+	OLED_WR_Byte(0xDB,OLED_CMD);//设置 VCOMH
+	OLED_WR_Byte(0x30,OLED_CMD);//设置 VCOM 取消选择电平
+	OLED_WR_Byte(0x20,OLED_CMD);//设置页地址模式（0x00/0x01/0x02）
 	OLED_WR_Byte(0x02,OLED_CMD);//
-	OLED_WR_Byte(0x8D,OLED_CMD);//--set Charge Pump enable/disable
-	OLED_WR_Byte(0x14,OLED_CMD);//--set(0x10) disable
+	OLED_WR_Byte(0x8D,OLED_CMD);//设置电荷泵使能/关闭
+	OLED_WR_Byte(0x14,OLED_CMD);//设置 0x10 为关闭
 	OLED_Clear();
 	OLED_WR_Byte(0xAF,OLED_CMD);
 }

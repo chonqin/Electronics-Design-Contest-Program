@@ -1,6 +1,6 @@
 /**
  * @file bsp_encoder.h
- * @brief Dual quadrature encoder BSP driver interface.
+ * @brief 双路正交编码器 BSP 驱动接口
  */
 #ifndef _BSP_ENCODER_H_
 #define _BSP_ENCODER_H_
@@ -25,38 +25,38 @@ typedef struct {
 } ENCODER_RES;
 
 /**
- * @brief Initialize encoder GPIO and periodic latch timer interrupts.
+ * @brief 初始化编码器 GPIO 和周期性锁存定时器中断
  */
 void encoder_init(void);
 
 /**
- * @brief Get encoder 1 latest latched count.
- * @return Encoder 1 count.
+ * @brief 获取编码器 1 最新锁存计数
+ * @return 编码器 1 计数
  */
 int get_encoder_count(void);
 
 /**
- * @brief Get encoder 1 latest direction.
- * @return Encoder 1 direction.
+ * @brief 获取编码器 1 最新方向
+ * @return 编码器 1 方向
  */
 ENCODER_DIR get_encoder_dir(void);
 
 /**
- * @brief Get selected encoder latest latched count.
- * @param id Encoder selector.
- * @return Selected encoder count.
+ * @brief 获取指定编码器最新锁存计数
+ * @param id 编码器选择
+ * @return 指定编码器计数
  */
 int encoder_get_count(ENCODER_ID id);
 
 /**
- * @brief Get selected encoder latest direction.
- * @param id Encoder selector.
- * @return Selected encoder direction.
+ * @brief 获取指定编码器最新方向
+ * @param id 编码器选择
+ * @return 指定编码器方向
  */
 ENCODER_DIR encoder_get_dir(ENCODER_ID id);
 
 /**
- * @brief Latch all encoder pulse accumulations into public state.
+ * @brief 将所有编码器脉冲累计值锁存到公共状态
  */
 void encoder_update(void);
 
