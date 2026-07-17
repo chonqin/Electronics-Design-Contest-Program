@@ -1,7 +1,6 @@
 /**
  * @file    bsp_icm42688.h
- * @brief   ICM42688 六轴惯性传感器驱动头文件
- * @note    适配TI MSPM0G3507平台,使用SPI通信
+ * @brief   ICM42688P SPI driver interface.
  */
 
 #ifndef __BSP_ICM42688_H
@@ -10,10 +9,10 @@
 #include <stdint.h>
 #include "board.h"
 
-/* ICM42688设备ID */
+/* Device ID */
 #define ICM_DEVICE_ID                      0x47
 
-/* Bank 0 寄存器地址 */
+/* Bank 0 registers */
 #define ICM42688_DEVICE_CONFIG             0x11
 #define ICM42688_DRIVE_CONFIG              0x13
 #define ICM42688_INT_CONFIG                0x14
@@ -74,13 +73,21 @@
 #define ICM42688_WHO_AM_I                  0x75
 #define ICM42688_REG_BANK_SEL              0x76
 
-/* 加速度计量程配置 */
+/* INT_CONFIG bits */
+#define ICM42688_INT1_MODE_LATCH           0x04
+#define ICM42688_INT1_DRIVE_OPEN_DRAIN     0x02
+#define ICM42688_INT1_POLARITY_HIGH        0x01
+
+/* INT_SOURCE0 bits */
+#define ICM42688_UI_DRDY_INT1_EN           0x08
+
+/* Accelerometer full-scale selections */
 #define AFS_2G                             0x03
 #define AFS_4G                             0x02
 #define AFS_8G                             0x01
 #define AFS_16G                            0x00
 
-/* 陀螺仪量程配置 */
+/* Gyroscope full-scale selections */
 #define GFS_2000DPS                        0x00
 #define GFS_1000DPS                        0x01
 #define GFS_500DPS                         0x02
@@ -90,7 +97,7 @@
 #define GFS_31_25DPS                       0x06
 #define GFS_15_625DPS                      0x07
 
-/* 加速度计输出速率配置 */
+/* Accelerometer output data rate selections */
 #define AODR_8000Hz                        0x03
 #define AODR_4000Hz                        0x04
 #define AODR_2000Hz                        0x05
@@ -105,7 +112,7 @@
 #define AODR_1_5625Hz                      0x0E
 #define AODR_500Hz                         0x0F
 
-/* 陀螺仪输出速率配置 */
+/* Gyroscope output data rate selections */
 #define GODR_8000Hz                        0x03
 #define GODR_4000Hz                        0x04
 #define GODR_2000Hz                        0x05
@@ -118,78 +125,82 @@
 #define GODR_500Hz                         0x0F
 
 /**
- * @brief 原始数据结构体(16位整型)
+ * @brief Raw 3-axis IMU data.
  */
 typedef struct {
-    int16_t x; /**< X轴原始数据 */
-    int16_t y; /**< Y轴原始数据 */
-    int16_t z; /**< Z轴原始数据 */
+    int16_t x;
+    int16_t y;
+    int16_t z;
 } icm42688_raw_data_t;
 
 /**
- * @brief 实际物理量数据结构体(浮点型)
+ * @brief Scaled 3-axis IMU data.
  */
 typedef struct {
-    float x; /**< X轴物理量 */
-    float y; /**< Y轴物理量 */
-    float z; /**< Z轴物理量 */
+    float x;
+    float y;
+    float z;
 } icm42688_real_data_t;
 
-/* 函数声明 */
-
 /**
- * @brief  ICM42688初始化
- * @return 1=成功, 0=失败
+ * @brief  Initialize the ICM42688P.
+ * @return 1 on success, 0 on failure.
  */
 uint8_t ICM_Init(void);
 
 /**
- * @brief  读取ICM42688设备ID
- * @return 1=成功, 0=失败
+ * @brief  Read the ICM42688P device ID.
+ * @return 1 on success, 0 on failure.
  */
 uint8_t ICM_ReadID(void);
 
 /**
- * @brief  设置加速度计灵敏度系数
- * @param  scale 量程配置(AFS_2G/AFS_4G/AFS_8G/AFS_16G)
- * @return 灵敏度系数(g/LSB)
+ * @brief  Update accelerometer sensitivity.
+ * @param  scale Full-scale selection.
+ * @return Sensitivity in g/LSB.
  */
 float bsp_Icm42688GetAres(uint8_t scale);
 
 /**
- * @brief  设置陀螺仪灵敏度系数
- * @param  scale 量程配置(GFS_xxx)
- * @return 灵敏度系数(dps/LSB)
+ * @brief  Update gyroscope sensitivity.
+ * @param  scale Full-scale selection.
+ * @return Sensitivity in dps/LSB.
  */
 float bsp_Icm42688GetGres(uint8_t scale);
 
 /**
- * @brief  读取加速度计原始数据
- * @param  data 存储数据的结构体指针
- * @return 0=成功
+ * @brief  Read raw accelerometer data.
+ * @param  data Output buffer.
+ * @return 0 on success.
  */
-int8_t bsp_IcmGet_Accelerometer(icm42688_raw_data_t* data);
+int8_t bsp_IcmGet_Accelerometer(icm42688_raw_data_t *data);
 
 /**
- * @brief  读取陀螺仪原始数据
- * @param  data 存储数据的结构体指针
- * @return 0=成功
+ * @brief  Read raw gyroscope data.
+ * @param  data Output buffer.
+ * @return 0 on success.
  */
-int8_t bsp_IcmGet_Gyroscope(icm42688_raw_data_t* data);
+int8_t bsp_IcmGet_Gyroscope(icm42688_raw_data_t *data);
 
 /**
- * @brief  读取加速度计和陀螺仪的实际物理量
- * @param  acc_data  加速度数据指针(单位:g)
- * @param  gyro_data 陀螺仪数据指针(单位:dps)
- * @return 0=成功
+ * @brief  Read scaled accelerometer and gyroscope data.
+ * @param  acc_data Output accelerometer buffer in g.
+ * @param  gyro_data Output gyroscope buffer in dps.
+ * @return 0 on success.
  */
-int8_t bsp_IcmGetRawData(icm42688_real_data_t* acc_data, icm42688_real_data_t* gyro_data);
+int8_t bsp_IcmGetRawData(icm42688_real_data_t *acc_data, icm42688_real_data_t *gyro_data);
 
 /**
- * @brief  读取温度
- * @param  temp 温度指针(单位:℃)
- * @return 0=成功
+ * @brief  Route the UI data-ready interrupt to INT1.
+ * @return 0 on success.
  */
-int8_t bsp_IcmGet_Temperature(int16_t* temp);
+int8_t bsp_IcmConfigDataReadyInt(void);
+
+/**
+ * @brief  Read the die temperature.
+ * @param  temp Output temperature in Celsius.
+ * @return 0 on success.
+ */
+int8_t bsp_IcmGet_Temperature(int16_t *temp);
 
 #endif /* __BSP_ICM42688_H */

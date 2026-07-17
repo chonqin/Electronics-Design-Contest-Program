@@ -84,6 +84,23 @@ static uint8_t ICM_Write_A_Byte(uint8_t addr, uint8_t data)
     return 0;
 }
 
+/**
+ * @brief Configure data-ready interrupt output on INT1.
+ * @return Always returns 0.
+ */
+int8_t bsp_IcmConfigDataReadyInt(void)
+{
+    /* INT1: push-pull, active high, pulse mode. */
+    ICM_Write_A_Byte(ICM42688_INT_CONFIG, ICM42688_INT1_POLARITY_HIGH);
+    /* Use the default async reset behavior and route UI data-ready only. */
+    ICM_Write_A_Byte(ICM42688_INT_CONFIG1, 0x00U);
+    ICM_Write_A_Byte(ICM42688_INT_SOURCE0, ICM42688_UI_DRDY_INT1_EN);
+    /* Read once to clear any stale status after configuration. */
+    (void) ICM_Read_A_Byte(ICM42688_INT_STATUS);
+
+    return 0;
+}
+
 uint8_t ICM_ReadID(void)
 {
     return (ICM_Read_A_Byte(ICM42688_WHO_AM_I) == ICM_DEVICE_ID) ? 1U : 0U;
@@ -125,6 +142,8 @@ uint8_t ICM_Init(void)
     temp |= 3U;
     ICM_Write_A_Byte(ICM42688_PWR_MGMT0, temp);
     ICM_DELAY_MS(10);
+
+    bsp_IcmConfigDataReadyInt();
 
     printf("ICM42688 Init success!\r\n");
     return 1U;

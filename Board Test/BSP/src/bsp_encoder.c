@@ -1,83 +1,91 @@
 #include "bsp_encoder.h"
+#include "imu.h"
 
 static ENCODER_RES motor_encoder;
-//编码器初始化
+
+/**
+ * @brief Initialize encoder GPIO and periodic latch timer interrupts.
+ */
 void encoder_init(void)
 {
-	//编码器引脚外部中断
-	NVIC_ClearPendingIRQ(GPIOB_INT_IRQn);
-	NVIC_EnableIRQ(GPIOB_INT_IRQn);
+    NVIC_ClearPendingIRQ(GPIOB_INT_IRQn);
+    NVIC_EnableIRQ(GPIOB_INT_IRQn);
 
     NVIC_ClearPendingIRQ(TIMER_ENCODER_TICK_INST_INT_IRQN);
-	NVIC_EnableIRQ(TIMER_ENCODER_TICK_INST_INT_IRQN);
+    NVIC_EnableIRQ(TIMER_ENCODER_TICK_INST_INT_IRQN);
 }
 
-//获取编码器的值
+/**
+ * @brief Get the latest latched encoder count.
+ * @return Encoder count.
+ */
 int get_encoder_count(void)
 {
-	return motor_encoder.count;
+    return motor_encoder.count;
 }
-//获取编码器的方向
+
+/**
+ * @brief Get the latest encoder direction.
+ * @return Current rotation direction.
+ */
 ENCODER_DIR get_encoder_dir(void)
 {
-	return motor_encoder.dir;
+    return motor_encoder.dir;
 }
 
-//编码器数据更新
-//请间隔一定时间更新
+/**
+ * @brief Latch encoder pulse accumulation into the public state.
+ */
 void encoder_update(void)
 {
-	motor_encoder.count = motor_encoder.temp_count;
-
-	//确定方向
-	motor_encoder.dir = ( motor_encoder.count >= 0 ) ? FORWARD : REVERSAL;
-
-	motor_encoder.temp_count = 0;//编码器计数值清零
+    motor_encoder.count = motor_encoder.temp_count;
+    motor_encoder.dir = (motor_encoder.count >= 0) ? FORWARD : REVERSAL;
+    motor_encoder.temp_count = 0;
 }
 
-//外部中断处理函数
+/**
+ * @brief Shared GROUP1 IRQ handler for IMU and encoder GPIO interrupts.
+ */
 void GROUP1_IRQHandler(void)
 {
-	uint32_t gpio_status;
+    uint32_t imu_status;
+    uint32_t enc_status;
 
-	//获取中断信号情况
-	gpio_status = DL_GPIO_getEnabledInterruptStatus(GPIO_ENCODER_PORT, GPIO_ENCODER_E1A_PIN | GPIO_ENCODER_E1B_PIN);
-	//编码器A相上升沿触发
-	if((gpio_status & GPIO_ENCODER_E1A_PIN) == GPIO_ENCODER_E1A_PIN)
-	{
-		//如果在A相上升沿下，B相为低电平
-		if(!DL_GPIO_readPins(GPIO_ENCODER_PORT,GPIO_ENCODER_E1B_PIN))
-		{
-			motor_encoder.temp_count--;
-		}
-		else
-		{
-			motor_encoder.temp_count++;
-		}
-	}//编码器B相上升沿触发
-	else if((gpio_status & GPIO_ENCODER_E1B_PIN)==GPIO_ENCODER_E1B_PIN)
-	{
-		//如果在B相上升沿下，A相为低电平
-		if(!DL_GPIO_readPins(GPIO_ENCODER_PORT,GPIO_ENCODER_E1A_PIN))
-		{
-			motor_encoder.temp_count++;
-		}
-		else
-		{
-			motor_encoder.temp_count--;
-		}
-	}
-	//清除状态
-	DL_GPIO_clearInterruptStatus(GPIO_ENCODER_PORT,GPIO_ENCODER_E1A_PIN | GPIO_ENCODER_E1B_PIN);
+    imu_status = DL_GPIO_getEnabledInterruptStatus(GPIO_IMU_INT_PORT,
+                                                   GPIO_IMU_INT_PA16_PIN);
+    if ((imu_status & GPIO_IMU_INT_PA16_PIN) != 0U) {
+        DL_GPIO_clearInterruptStatus(GPIO_IMU_INT_PORT, GPIO_IMU_INT_PA16_PIN);
+        IMU_dataReadyIrqHandler();
+    }
+
+    enc_status = DL_GPIO_getEnabledInterruptStatus(GPIO_ENCODER_PORT,
+                                                   GPIO_ENCODER_E1A_PIN | GPIO_ENCODER_E1B_PIN);
+    if ((enc_status & GPIO_ENCODER_E1A_PIN) != 0U) {
+        if (!DL_GPIO_readPins(GPIO_ENCODER_PORT, GPIO_ENCODER_E1B_PIN)) {
+            motor_encoder.temp_count--;
+        } else {
+            motor_encoder.temp_count++;
+        }
+    } else if ((enc_status & GPIO_ENCODER_E1B_PIN) != 0U) {
+        if (!DL_GPIO_readPins(GPIO_ENCODER_PORT, GPIO_ENCODER_E1A_PIN)) {
+            motor_encoder.temp_count++;
+        } else {
+            motor_encoder.temp_count--;
+        }
+    }
+
+    if (enc_status != 0U) {
+        DL_GPIO_clearInterruptStatus(GPIO_ENCODER_PORT,
+                                     GPIO_ENCODER_E1A_PIN | GPIO_ENCODER_E1B_PIN);
+    }
 }
 
-//电机编码器脉冲计数
+/**
+ * @brief Periodically latch encoder pulse accumulation.
+ */
 void TIMG0_IRQHandler(void)
 {
-	//20ms归零中断触发
-	if( DL_TimerA_getPendingInterrupt(TIMER_ENCODER_TICK_INST) == DL_TIMER_IIDX_ZERO )
-	{
-		//编码器更新
-		encoder_update();
-	}
+    if (DL_TimerA_getPendingInterrupt(TIMER_ENCODER_TICK_INST) == DL_TIMER_IIDX_ZERO) {
+        encoder_update();
+    }
 }

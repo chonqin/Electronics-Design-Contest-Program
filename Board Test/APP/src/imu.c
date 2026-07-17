@@ -9,8 +9,8 @@
 #include <stdio.h>
 #include <string.h>
 
-/** @brief IMU sample period configured in SysConfig. */
-#define IMU_SAMPLE_PERIOD_S       (0.010f)
+/** @brief IMU sample period derived from ICM42688P 200 Hz ODR. */
+#define IMU_SAMPLE_PERIOD_S       (0.005f)
 /** @brief Half sample period used by quaternion integration. */
 #define IMU_HALF_SAMPLE_PERIOD_S  (IMU_SAMPLE_PERIOD_S * 0.5f)
 /** @brief Gyro offset window size. */
@@ -26,7 +26,7 @@
 icm42688_real_data_t accval;
 /** @brief Latest gyroscope sample in dps. */
 icm42688_real_data_t gyroval;
-/** @brief Sample tick counter, 1 tick = 10 ms. */
+/** @brief Sample tick counter, 1 tick = 1 IMU data-ready event. */
 volatile uint32_t nowtime = 0;
 
 xyz_f_t north, west;
@@ -337,6 +337,12 @@ void IMU_sample(void)
                    (gyroval.z - gyro_offset[2]) * M_PI / 180.0f,
                    accval.x, accval.y, accval.z, halfT);
     IMU_updateYpr();
+}
+
+void IMU_dataReadyIrqHandler(void)
+{
+    nowtime += 1U;
+    IMU_sample();
 }
 
 void IMU_getYawPitchRoll(float *angles)

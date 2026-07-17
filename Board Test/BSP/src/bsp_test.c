@@ -157,9 +157,11 @@ void BSP_Test_IMU(void)
 
     IMU_init();
 
-    NVIC_ClearPendingIRQ(TIMER_IMU_TICK_INST_INT_IRQN);
-    NVIC_EnableIRQ(TIMER_IMU_TICK_INST_INT_IRQN);
-    DL_TimerA_startCounter(TIMER_IMU_TICK_INST);
+    DL_TimerA_stopCounter(TIMER_IMU_TICK_INST);
+    NVIC_DisableIRQ(TIMER_IMU_TICK_INST_INT_IRQN);
+    DL_GPIO_clearInterruptStatus(GPIO_IMU_INT_PORT, GPIO_IMU_INT_PA16_PIN);
+    NVIC_ClearPendingIRQ(GPIO_IMU_INT_INT_IRQN);
+    NVIC_EnableIRQ(GPIO_IMU_INT_INT_IRQN);
 
     IMU_resetTimestamp();
     UI_IMU_Calibrating();
@@ -175,21 +177,5 @@ void BSP_Test_IMU(void)
         IMU_getYawPitchRoll(angles);
         UI_Test_IMU(angles);
         lc_printf("P R Y:%.2f , %.2f , %.2f\n", angles[1], angles[2], angles[0]);
-    }
-}
-
-/**
- * @brief  IMU sampling timer ISR.
- * @note   TIMER_IMU_TICK is configured to 10 ms in SysConfig.
- */
-void TIMA0_IRQHandler(void)
-{
-    switch (DL_TimerA_getPendingInterrupt(TIMER_IMU_TICK_INST)) {
-        case DL_TIMER_IIDX_ZERO:
-            nowtime += 1U;
-            IMU_sample();
-            break;
-        default:
-            break;
     }
 }
