@@ -3,7 +3,6 @@
  * @brief 双路正交编码器 BSP 驱动实现
  */
 #include "bsp_encoder.h"
-#include "imu.h"
 
 static ENCODER_RES encoder[ENCODER_NUM];
 
@@ -117,41 +116,21 @@ void encoder_update(void)
 }
 
 /**
- * @brief IMU 和编码器 GPIO 中断共用的 GROUP1 中断处理函数
+ * @brief 处理编码器 GPIO 边沿中断状态
+ * @param status 编码器 GPIO 中断状态
  */
-void GROUP1_IRQHandler(void)
+void encoder_gpio_irq_handler(uint32_t status)
 {
-    uint32_t imu_status;
-    uint32_t enc_status;
-    uint32_t enc_pins;
-
-    imu_status = DL_GPIO_getEnabledInterruptStatus(GPIO_IMU_INT_PORT,
-                                                   GPIO_IMU_INT_PA16_PIN);
-    if ((imu_status & GPIO_IMU_INT_PA16_PIN) != 0U) {
-        DL_GPIO_clearInterruptStatus(GPIO_IMU_INT_PORT, GPIO_IMU_INT_PA16_PIN);
-        IMU_dataReadyIrqHandler();
-    }
-
-    enc_pins = GPIO_ENCODER_E1A_PIN | GPIO_ENCODER_E1B_PIN |
-               GPIO_ENCODER_E2A_PIN | GPIO_ENCODER_E2B_PIN;
-    enc_status = DL_GPIO_getEnabledInterruptStatus(GPIO_ENCODER_PORT, enc_pins);
-
-    encoder_count_ab(&encoder[ENCODER_1], enc_status,
+    encoder_count_ab(&encoder[ENCODER_1], status,
                      GPIO_ENCODER_E1A_PIN, GPIO_ENCODER_E1B_PIN);
-    encoder_count_ab(&encoder[ENCODER_2], enc_status,
+    encoder_count_ab(&encoder[ENCODER_2], status,
                      GPIO_ENCODER_E2A_PIN, GPIO_ENCODER_E2B_PIN);
-
-    if (enc_status != 0U) {
-        DL_GPIO_clearInterruptStatus(GPIO_ENCODER_PORT, enc_pins);
-    }
 }
 
 /**
- * @brief 周期性锁存编码器脉冲累计值
+ * @brief 处理编码器周期锁存定时器中断
  */
-void TIMG0_IRQHandler(void)
+void encoder_tick_irq_handler(void)
 {
-    if (DL_TimerA_getPendingInterrupt(TIMER_ENCODER_TICK_INST) == DL_TIMER_IIDX_ZERO) {
-        encoder_update();
-    }
+    encoder_update();
 }

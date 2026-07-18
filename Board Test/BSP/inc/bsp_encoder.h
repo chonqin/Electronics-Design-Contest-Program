@@ -60,4 +60,15 @@ ENCODER_DIR encoder_get_dir(ENCODER_ID id);
  */
 void encoder_update(void);
 
+/**
+ * @brief 处理编码器 GPIO 边沿中断状态
+ * @param status 编码器 GPIO 中断状态
+ */
+void encoder_gpio_irq_handler(uint32_t status);
+
+/**
+ * @brief 处理编码器周期锁存定时器中断
+ */
+void encoder_tick_irq_handler(void);
+
 #endif
