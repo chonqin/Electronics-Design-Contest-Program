@@ -15,16 +15,16 @@
 #include <stdio.h>
 
 /* 左右轮保留独立 PID 参数，后续可单独微调 */
-#define PID_L_KP            40.0f
-#define PID_L_KI            3.0f
-#define PID_L_KD            1.0f
-#define PID_R_KP            30.0f
-#define PID_R_KI            1.0f
-#define PID_R_KD            1.0f
-#define PID_TUNE_STEP       3
-#define PID_TUNE_MAX        100
+#define PID_L_KP            65.0f
+#define PID_L_KI            7.5f
+#define PID_L_KD            4.5f
+#define PID_R_KP            65.0f
+#define PID_R_KI            7.5f
+#define PID_R_KD            4.5f
+#define PID_TUNE_STEP       5
+#define PID_TUNE_MAX        40
 #define PID_TUNE_MIN        0
-#define MOTOR_DUTY_STEP     200
+#define MOTOR_DUTY_STEP     100
 #define MOTOR_DUTY_MAX      MOTOR_PWM_PERIOD
 #define MOTOR_DUTY_MIN      (-MOTOR_PWM_PERIOD)
 
@@ -337,8 +337,7 @@ void BSP_Test_PID(void)
         Motor_Stop(motor_off);
 
         UI_Test_PID(wheel, actual, set, out);
-        lc_printf("PID[%s] actual:%d target:%d out:%d\r\n",
-                  wheel, actual, set, out);
+        lc_printf("actual,target,out:%d , %d , %d\r\n",actual, set, out);
         delay_ms(50);
     }
 }
