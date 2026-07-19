@@ -16,7 +16,9 @@ typedef enum {
     TASK_3 = 2,
     TASK_4 = 3,
     TASK_5 = 4,
-    TASK_COUNT = 5,
+    TASK_6 = 5,
+    TASK_7 = 6,
+    TASK_COUNT = 7,
     TASK_NONE  = -1   /**< 无操作（取消或无效） */
 } Task_ID;
 

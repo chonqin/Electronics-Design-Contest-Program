@@ -15,7 +15,7 @@
 
 /** 一级菜单各项名称，顺序对应 Task_ID */
 static const char *TASK_NAMES[TASK_COUNT] = {
-    "PID", "ENC", "MOTOR", "IMU", "OLED"
+    "PID", "ENC", "MOTOR", "IMU", "OLED", "UART", "TRACK"
 };
 
 /** @brief 64px OLED 下 16px 字体可见的最大菜单行数 */

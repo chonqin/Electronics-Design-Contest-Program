@@ -42,6 +42,19 @@ void BSP_Uart_Init(void)
 {
     rx_head = 0U;
     rx_tail = 0U;
+
+    DL_UART_Main_enableInterrupt(UART_0_INST,
+        DL_UART_MAIN_INTERRUPT_RX |
+        DL_UART_MAIN_INTERRUPT_RX_TIMEOUT_ERROR |
+        DL_UART_MAIN_INTERRUPT_OVERRUN_ERROR |
+        DL_UART_MAIN_INTERRUPT_BREAK_ERROR |
+        DL_UART_MAIN_INTERRUPT_PARITY_ERROR |
+        DL_UART_MAIN_INTERRUPT_FRAMING_ERROR |
+        DL_UART_MAIN_INTERRUPT_NOISE_ERROR);
+
+    /* 使能 CPU 侧 UART0 IRQ，否则外设中断不会进入 UART0_IRQHandler */
+    NVIC_ClearPendingIRQ(UART_0_INST_INT_IRQN);
+    NVIC_EnableIRQ(UART_0_INST_INT_IRQN);
 }
 
 void BSP_Uart_IRQHandler(void)

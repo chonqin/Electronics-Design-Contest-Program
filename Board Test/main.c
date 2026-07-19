@@ -32,6 +32,8 @@ int main(void)
             case TASK_3: Test_Motor();          break;
             case TASK_4: Test_IMU();            break;
             case TASK_5: Test_OLED();           break;
+            case TASK_6: Test_UartReceive();    break;
+            case TASK_7: Test_Track();          break;
             default:                            break;
         }
     }

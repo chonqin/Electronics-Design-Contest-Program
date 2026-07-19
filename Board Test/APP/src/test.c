@@ -9,13 +9,17 @@
 #include "bsp_icm42688.h"
 #include "bsp_key.h"
 #include "bsp_motor.h"
+#include "bsp_track.h"
+#include "bsp_uart.h"
 #include "imu.h"
+#include "oled.h"
 #include "ui.h"
 #include <stdio.h>
 
 #define MOTOR_DUTY_STEP     100
 #define MOTOR_DUTY_MAX      MOTOR_PWM_PERIOD
 #define MOTOR_DUTY_MIN      (-MOTOR_PWM_PERIOD)
+#define UART_TEST_BUF_SIZE  64U
 
 static void LED1_Off(void)
 {
@@ -200,5 +204,50 @@ void Test_IMU(void)
         IMU_getYawPitchRoll(angles);
         UI_Test_IMU(angles);
         lc_printf("P R Y:%.2f , %.2f , %.2f\n", angles[1], angles[2], angles[0]);
+    }
+}
+
+void Test_UartReceive(void)
+{
+    uint8_t buf[UART_TEST_BUF_SIZE];
+    uint16_t len;
+
+    BSP_Uart_FlushRx();
+    lc_printf("UART0 receive echo test start\r\n");
+
+    while (1) {
+        len = BSP_Uart_Read(buf, UART_TEST_BUF_SIZE);
+
+        if (len > 0U) {
+            /* 将上位机发来的数据原样回发，用于验证 RX 中断和 TX 发送链路 */
+            (void)BSP_Uart_Write(buf, len);
+        }
+    }
+}
+
+void Test_Track(void)
+{
+    uint8_t mask;
+    char line[16] = "x1-x8:00000000";
+
+    UI_Init();
+    OLED_Clear();
+    OLED_ShowString(0, 0, (u8 *)"Track Test", 16, 1);
+
+    while (1) {
+        mask = Track_ReadMask();
+
+        for (uint8_t i = 0U; i < 8U; i++) {
+            line[6U + i] = '0';
+            if ((mask & (uint8_t)(1U << i)) != 0U) {
+                /* bit0-bit7 对应 X1-X8，1 表示检测到黑线。 */
+                line[6U + i] = '1';
+            }
+        }
+
+        OLED_ShowString(0, 24, (u8 *)line, 16, 1);
+        OLED_Refresh();
+        lc_printf("%s\r\n", line);
+        delay_ms(100);
     }
 }

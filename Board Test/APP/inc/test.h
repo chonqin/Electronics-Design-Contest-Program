@@ -34,4 +34,14 @@ void Test_Encoder(void);
  */
 void Test_IMU(void);
 
+/**
+ * @brief UART0 接收回发测试入口
+ */
+void Test_UartReceive(void);
+
+/**
+ * @brief 循迹模块 OLED 和串口显示测试
+ */
+void Test_Track(void);
+
 #endif
