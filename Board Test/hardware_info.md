@@ -9,7 +9,7 @@
 
 ### 通信接口与传感器
 - LED: PA7、PB2
-- UART：UART0_TX对应PA10 UART0_RX对应PA11，UART1_TX对应PA8 UART1_RX对应PA9。
+- UART：UART0_TX对应PA10 UART0_RX对应PA11，UART1_TX对应PA8 UART1_RX对应PA9。UART0 用于发送调试信息，uart1用于与视觉模块通信。
 - 开启SPI外设用于陀螺仪：MISO->PA14 , MOSI->PB19 , sclk->pa12 cs->pb25,int->pa16陀螺仪型号为icm42688p 。
 - 开启i2c外设用于OLED：SDA->PA30`、`SCL->PA29
 - 电机驱动：电机所需的定时器请自行开启

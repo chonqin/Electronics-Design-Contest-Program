@@ -48,4 +48,26 @@ uint16_t BSP_Uart_Read(uint8_t *buf, uint16_t len);
  */
 void BSP_Uart_FlushRx(void);
 
+/**
+ * @brief 发送单个字节
+ * @param dat 待发送字节
+ * @return 发送成功返回 1
+ */
+int BSP_Uart_WriteByte(uint8_t dat);
+
+/**
+ * @brief 批量发送数据
+ * @param buf 待发送数据
+ * @param len 待发送长度
+ * @return 实际发送长度
+ */
+uint16_t BSP_Uart_Write(uint8_t const *buf, uint16_t len);
+
+/**
+ * @brief 发送字符串
+ * @param str 待发送字符串
+ * @return 实际发送字符数
+ */
+uint16_t BSP_Uart_WriteString(char const *str);
+
 #endif
