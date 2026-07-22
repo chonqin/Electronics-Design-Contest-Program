@@ -46,16 +46,26 @@
             ]
         },
         {
-            "name": "MSPM0G3507.ccxml",
+            "name": "2024_Question_H",
             "type": "ccs-debug",
             "request": "launch",
-            "targetConfig": "${workspaceFolder}\\empty_test\\targetConfigs\\MSPM0G3507.ccxml"
-        },
-        {
-            "name": "MSPM0G3507.ccxml (1)",
-            "type": "ccs-debug",
-            "request": "launch",
-            "targetConfig": "${workspaceFolder}\\Board_Test\\targetConfigs\\MSPM0G3507.ccxml"
+            "projectInfo": {
+                "name": "2024_Question_H",
+                "resourceId": "/2024_Question_H"
+            },
+            "connections": [
+                {
+                    "name": "SEGGER J-Link Emulator",
+                    "cores": [
+                        {
+                            "name": "CORTEX_M0P",
+                            "debuggerSettings": {
+                                "data": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n<PropertyValues/>\n"
+                            }
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }

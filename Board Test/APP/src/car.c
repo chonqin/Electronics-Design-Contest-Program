@@ -7,9 +7,9 @@
 #include "bsp_motor.h"
 #include "pid.h"
 
-#define CAR_KP          1.0f
-#define CAR_KI          0.0f
-#define CAR_KD          0.0f
+#define CAR_KP          65.0f
+#define CAR_KI          7.5f
+#define CAR_KD          4.5f
 
 typedef struct {
     PID pid_l;
@@ -66,13 +66,13 @@ void Car_Stop(void)
     Motor_Stop(MOTOR_A);
     Motor_Stop(MOTOR_B);
 }
-
+// 设定左右轮速
 void Car_SetWheelSpeed(int left, int right)
 {
     car.target_l = left;
     car.target_r = right;
 }
-
+// 
 void Car_SetSpeed(int linear, int turn)
 {
     Car_SetWheelSpeed(linear - turn, linear + turn);
