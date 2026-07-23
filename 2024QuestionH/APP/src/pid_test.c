@@ -12,8 +12,8 @@
 #include "ui.h"
 
 /* 与 car.c 保持一致：10 倍误差映射 + 增量式 PI 修正。 */
-#define PID_TEST_KP         0.0f
-#define PID_TEST_KI         0.2f
+#define PID_TEST_KP         1.0f
+#define PID_TEST_KI         0.1f
 #define PID_TEST_KD         0.0f
 #define PID_TEST_INC_LIMIT  50.0f
 #define PID_TEST_ERR_GAIN   100

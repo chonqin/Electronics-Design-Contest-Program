@@ -1,6 +1,6 @@
 /**
  * @file pid.h
- * @brief 增量式 PID 控制器接口
+ * @brief 通用 PID 控制器接口
  */
 #ifndef _PID_H_
 #define _PID_H_
@@ -61,20 +61,37 @@ void PID_SetLimit(PID *pid, float out_min, float out_max);
 void PID_SetTarget(PID *pid, float target);
 
 /**
+ * @brief 根据当前目标计算位置式 PID 输出
+ * @param pid PID 控制器实例
+ * @param actual 反馈值
+ * @return 限幅后的输出量
+ */
+float PID_Calc(PID *pid, float actual);
+
+/**
+ * @brief 更新目标后计算位置式 PID 输出
+ * @param pid PID 控制器实例
+ * @param target 目标值
+ * @param actual 反馈值
+ * @return 限幅后的输出量
+ */
+float PID_CalcTarget(PID *pid, float target, float actual);
+
+/**
  * @brief 根据当前目标计算增量式 PID 输出
  * @param pid PID 控制器实例
- * @param fb 反馈值
+ * @param actual 反馈值
  * @return 限幅后的输出增量
  */
-float PID_CalcInc(PID *pid, float fb);
+float PID_CalcInc(PID *pid, float actual);
 
 /**
  * @brief 更新目标后计算增量式 PID 输出
  * @param pid PID 控制器实例
  * @param target 目标值
- * @param fb 反馈值
+ * @param actual 反馈值
  * @return 限幅后的输出增量
  */
-float PID_CalcIncTarget(PID *pid, float target, float fb);
+float PID_CalcIncTarget(PID *pid, float target, float actual);
 
 #endif

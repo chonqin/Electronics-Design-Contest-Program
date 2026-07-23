@@ -86,10 +86,11 @@ APP/src/line_track.o: ../APP/src/line_track.c \
  C:/ti/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_wwdt.h \
  C:/ti/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_interrupt.h \
  C:/ti/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_systick.h \
+ C:/Users/chonqin/Desktop/Ti\ projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_encoder.h \
  C:/Users/chonqin/Desktop/Ti\ projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_key.h \
+ C:/Users/chonqin/Desktop/Ti\ projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_motor.h \
  C:/Users/chonqin/Desktop/Ti\ projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_track.h \
  C:/Users/chonqin/Desktop/Ti\ projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_uart.h \
- C:/Users/chonqin/Desktop/Ti\ projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/car.h \
  C:/Users/chonqin/Desktop/Ti\ projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/oled.h \
  C:/Users/chonqin/Desktop/Ti\ projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/pid.h \
  C:/Users/chonqin/Desktop/Ti\ projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/ui.h
@@ -178,10 +179,11 @@ C:/ti/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_vref.h:
 C:/ti/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_wwdt.h:
 C:/ti/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_interrupt.h:
 C:/ti/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_systick.h:
+C:/Users/chonqin/Desktop/Ti\ projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_encoder.h:
 C:/Users/chonqin/Desktop/Ti\ projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_key.h:
+C:/Users/chonqin/Desktop/Ti\ projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_motor.h:
 C:/Users/chonqin/Desktop/Ti\ projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_track.h:
 C:/Users/chonqin/Desktop/Ti\ projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_uart.h:
-C:/Users/chonqin/Desktop/Ti\ projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/car.h:
 C:/Users/chonqin/Desktop/Ti\ projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/oled.h:
 C:/Users/chonqin/Desktop/Ti\ projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/pid.h:
 C:/Users/chonqin/Desktop/Ti\ projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/ui.h:

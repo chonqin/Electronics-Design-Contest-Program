@@ -1,6 +1,6 @@
 /**
  * @file pid.c
- * @brief 增量式 PID 控制器实现
+ * @brief 通用 PID 控制器实现
  */
 #include "pid.h"
 
@@ -22,6 +22,33 @@ static float PID_Limit(float val, float min, float max)
     }
 
     return val;
+}
+
+/**
+ * @brief 限制积分项，避免位置式 PID 长时间饱和
+ * @param pid PID 控制器实例
+ */
+static void PID_LimitSum(PID *pid)
+{
+    float min;
+    float max;
+    float tmp;
+
+    if (pid->ki == 0.0f) {
+        pid->sum = 0.0f;
+        return;
+    }
+
+    min = pid->out_min / pid->ki;
+    max = pid->out_max / pid->ki;
+
+    if (min > max) {
+        tmp = min;
+        min = max;
+        max = tmp;
+    }
+
+    pid->sum = PID_Limit(pid->sum, min, max);
 }
 
 void PID_Init(PID *pid, float kp, float ki, float kd, float out_min, float out_max)
@@ -87,7 +114,7 @@ void PID_SetLimit(PID *pid, float out_min, float out_max)
 
     pid->out_min = out_min;
     pid->out_max = out_max;
-    pid->sum = PID_Limit(pid->sum, out_min, out_max);
+    PID_LimitSum(pid);
     pid->out = PID_Limit(pid->out, out_min, out_max);
 }
 
@@ -100,7 +127,38 @@ void PID_SetTarget(PID *pid, float target)
     pid->target = target;
 }
 
-float PID_CalcInc(PID *pid, float fb)
+float PID_Calc(PID *pid, float actual)
+{
+    float out;
+
+    if (pid == 0) {
+        return 0.0f;
+    }
+
+    pid->err = pid->target - actual;
+    pid->sum += pid->err;
+    PID_LimitSum(pid);
+
+    /* 位置式 PID 输出执行量，可直接作为 duty、角速度等控制量使用。 */
+    out = pid->kp * pid->err;
+    out += pid->ki * pid->sum;
+    out += pid->kd * (pid->err - pid->last_err);
+    pid->out = PID_Limit(out, pid->out_min, pid->out_max);
+
+    pid->prev_err = pid->last_err;
+    pid->last_err = pid->err;
+
+    return pid->out;
+}
+
+float PID_CalcTarget(PID *pid, float target, float actual)
+{
+    PID_SetTarget(pid, target);
+
+    return PID_Calc(pid, actual);
+}
+
+float PID_CalcInc(PID *pid, float actual)
 {
     float inc;
 
@@ -108,9 +166,8 @@ float PID_CalcInc(PID *pid, float fb)
         return 0.0f;
     }
 
-    pid->err = pid->target - fb;
+    pid->err = pid->target - actual;
 
-    /* 增量式 PID 输出的是本轮调节量，由调用者累加到执行量。 */
     inc = pid->kp * (pid->err - pid->last_err);
     inc += pid->ki * pid->err;
     inc += pid->kd * (pid->err - 2.0f * pid->last_err + pid->prev_err);
@@ -122,9 +179,9 @@ float PID_CalcInc(PID *pid, float fb)
     return pid->out;
 }
 
-float PID_CalcIncTarget(PID *pid, float target, float fb)
+float PID_CalcIncTarget(PID *pid, float target, float actual)
 {
     PID_SetTarget(pid, target);
 
-    return PID_CalcInc(pid, fb);
+    return PID_CalcInc(pid, actual);
 }
