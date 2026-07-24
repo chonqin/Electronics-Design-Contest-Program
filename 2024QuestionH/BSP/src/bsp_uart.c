@@ -21,6 +21,7 @@ static void uart_rx_push(uint8_t dat)
     uint8_t next = (uint8_t)(rx_head + 1U);
 
     if (next == rx_tail) {
+        // 缓冲区满时丢弃新字节，优先保持已有数据顺序不乱。
         return;
     }
 
@@ -67,6 +68,7 @@ void BSP_Uart_IRQHandler(void)
         case DL_UART_MAIN_IIDX_PARITY_ERROR:
         case DL_UART_MAIN_IIDX_FRAMING_ERROR:
         case DL_UART_MAIN_IIDX_NOISE_ERROR:
+            // 无论是正常接收还是异常收尾，都先把 FIFO 里现有字节搬空。
             uart_rx_drain_fifo();
             break;
         default:
@@ -131,11 +133,13 @@ uint16_t BSP_Uart_Write(uint8_t const *buf, uint16_t len)
         return 0U;
     }
 
+    // 按 FIFO 可用空间分批发送，避免一次写入长度超过硬件容量。
     while (cnt < len) {
         wr = DL_UART_Main_fillTXFIFO(UART_0_INST, (uint8_t *)&buf[cnt], (uint32_t)(len - cnt));
         cnt = (uint16_t)(cnt + (uint16_t)wr);
 
         if (wr == 0U) {
+            // FIFO 满时阻塞等出一个位置，再继续推进剩余数据。
             while (DL_UART_Main_fillTXFIFO(UART_0_INST, (uint8_t *)&buf[cnt], 1U) == 0U) {
                 ;
             }

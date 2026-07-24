@@ -4,73 +4,80 @@
  */
 #include "bsp_encoder.h"
 
-static ENCODER_RES encoder[ENCODER_NUM];
+static volatile long long pulse[2];
+static int count[2];
 
 /**
- * @brief 各编码器方向符号修正，用于统一正转方向
+ * @brief 编码器方向符号修正，用于统一前进为正
+ *
+ * @details
+ * E1 对应 MOTOR_A，E2 对应 MOTOR_B。
  */
-static const int encoder_sign[ENCODER_NUM] = {
+static const int sign[2] = {
     -1,
     1
 };
 
 /**
- * @brief 将编码器选择映射到有效状态对象
- * @param id 编码器选择
- * @return 编码器状态指针
+ * @brief 将编码器编号转换成内部数组下标
+ * @param id 编码器编号
+ * @return 有效的内部数组下标
  */
-static ENCODER_RES *encoder_get_res(ENCODER_ID id)
+static uint8_t encoder_idx(Encoder_ID id)
 {
-    if (id >= ENCODER_NUM) {
-        return &encoder[ENCODER_1];
+    if (id == ENCODER_E2) {
+        return 1U;
     }
 
-    return &encoder[id];
+    return 0U;
 }
 
 /**
- * @brief 根据边沿标志和另一相电平计算一个正交编码器计数
- * @param res 要更新的编码器状态
- * @param status 编码器引脚的使能中断状态
+ * @brief 根据 AB 相边沿累计一个编码器脉冲
+ * @param idx 编码器下标
+ * @param status 编码器 GPIO 中断状态
  * @param a_pin A 相 GPIO 引脚掩码
  * @param b_pin B 相 GPIO 引脚掩码
  */
-static void encoder_count_ab(ENCODER_RES *res, uint32_t status, uint32_t a_pin, uint32_t b_pin)
+static void encoder_count_ab(uint8_t idx, uint32_t status, uint32_t a_pin, uint32_t b_pin)
 {
     if ((status & a_pin) != 0U) {
+        // A 相触发时读取 B 相电平，用正交关系判断增减方向。
         if (DL_GPIO_readPins(GPIO_ENCODER_PORT, b_pin) == 0U) {
-            res->temp_count--;
+            pulse[idx]--;
         } else {
-            res->temp_count++;
+            pulse[idx]++;
         }
     }
 
     if ((status & b_pin) != 0U) {
+        // B 相触发时反查 A 相，补齐双边沿计数。
         if (DL_GPIO_readPins(GPIO_ENCODER_PORT, a_pin) == 0U) {
-            res->temp_count++;
+            pulse[idx]++;
         } else {
-            res->temp_count--;
+            pulse[idx]--;
         }
     }
 }
 
 /**
- * @brief 将单个编码器的脉冲累计值锁存到公共状态
- * @param res 要锁存的编码器状态
- * @param id 编码器选择
+ * @brief 将单个编码器累计脉冲锁存为当前周期计数
+ * @param idx 编码器下标
  */
-static void encoder_latch(ENCODER_RES *res, ENCODER_ID id)
+static void encoder_latch(uint8_t idx)
 {
-    res->count = (int)(res->temp_count * encoder_sign[id]);
-    res->dir = (res->count >= 0) ? FORWARD : REVERSAL;
-    res->temp_count = 0;
+    // 定时锁存把一个采样周期内的脉冲数转成速度反馈。
+    count[idx] = (int)(pulse[idx] * sign[idx]);
+    pulse[idx] = 0;
 }
 
-/**
- * @brief 初始化编码器 GPIO 和周期性锁存定时器中断
- */
-void encoder_init(void)
+void Encoder_Init(void)
 {
+    pulse[0] = 0;
+    pulse[1] = 0;
+    count[0] = 0;
+    count[1] = 0;
+
     NVIC_ClearPendingIRQ(GPIOB_INT_IRQn);
     NVIC_EnableIRQ(GPIOB_INT_IRQn);
 
@@ -78,59 +85,27 @@ void encoder_init(void)
     NVIC_EnableIRQ(TIMER_ENCODER_TICK_INST_INT_IRQN);
 }
 
-/**
- * @brief 获取最新锁存的编码器计数
- * @return 编码器计数
- */
-int get_encoder_count(void)
+int Encoder_Read(Encoder_ID id)
 {
-    return encoder_get_count(ENCODER_1);
-}
-
-/**
- * @brief 获取最新编码器方向
- * @return 当前旋转方向
- */
-ENCODER_DIR get_encoder_dir(void)
-{
-    return encoder_get_dir(ENCODER_1);
-}
-
-int encoder_get_count(ENCODER_ID id)
-{
-    return encoder_get_res(id)->count;
-}
-
-ENCODER_DIR encoder_get_dir(ENCODER_ID id)
-{
-    return encoder_get_res(id)->dir;
-}
-
-/**
- * @brief 将编码器脉冲累计值锁存到公共状态
- */
-void encoder_update(void)
-{
-    encoder_latch(&encoder[ENCODER_1], ENCODER_1);
-    encoder_latch(&encoder[ENCODER_2], ENCODER_2);
+    return count[encoder_idx(id)];
 }
 
 /**
  * @brief 处理编码器 GPIO 边沿中断状态
  * @param status 编码器 GPIO 中断状态
  */
-void encoder_gpio_irq_handler(uint32_t status)
+void Encoder_GpioIrqHandler(uint32_t status)
 {
-    encoder_count_ab(&encoder[ENCODER_1], status,
-                     GPIO_ENCODER_E1A_PIN, GPIO_ENCODER_E1B_PIN);
-    encoder_count_ab(&encoder[ENCODER_2], status,
-                     GPIO_ENCODER_E2A_PIN, GPIO_ENCODER_E2B_PIN);
+    // 两路编码器共用一组端口中断，这里按引脚集合拆分处理。
+    encoder_count_ab(0U, status, GPIO_ENCODER_E1A_PIN, GPIO_ENCODER_E1B_PIN);
+    encoder_count_ab(1U, status, GPIO_ENCODER_E2A_PIN, GPIO_ENCODER_E2B_PIN);
 }
 
 /**
  * @brief 处理编码器周期锁存定时器中断
  */
-void encoder_tick_irq_handler(void)
+void Encoder_TickIrqHandler(void)
 {
-    encoder_update();
+    encoder_latch(0U);
+    encoder_latch(1U);
 }

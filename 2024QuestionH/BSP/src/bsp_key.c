@@ -41,6 +41,7 @@ Key_State Key_Read(Key_ID key)
             raw1 = DL_GPIO_readPins(GPIO_KEY_PIN_18_PORT, GPIO_KEY_PIN_18_PIN);
             debug_key1_raw = raw1;
             if (raw1 != 0) return KEY_RELEASED;
+            // 低电平有效，首次检测到按下后再做一次延时确认。
             delay_ms(10);
             raw2 = DL_GPIO_readPins(GPIO_KEY_PIN_18_PORT, GPIO_KEY_PIN_18_PIN);
             return (raw2 == 0) ? KEY_PRESSED : KEY_RELEASED;
@@ -73,6 +74,7 @@ Key_State Key_Read(Key_ID key)
 int8_t Key_Scan(void)
 {
     for (int8_t k = 0; k < 3; k++) {
+        // 扫描到第一枚按下的按键就立即返回，保持菜单响应简单稳定。
         if (Key_Read((Key_ID)k) == KEY_PRESSED)
             return k;
     }

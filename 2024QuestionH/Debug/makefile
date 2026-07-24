@@ -4,7 +4,7 @@
 
 SHELL = cmd.exe
 
-CG_TOOL_ROOT := C:/ti/ccs2031/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS
+CG_TOOL_ROOT := D:/TI/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS
 
 GEN_OPTS__FLAG := @"./device.opt" 
 GEN_CMDS__FLAG := -Wl,-l"./device_linker.cmd" 
@@ -14,11 +14,11 @@ ORDERED_OBJS += \
 "./startup_mspm0g350x_ticlang.o" \
 "./main.o" \
 "./APP/src/car.o" \
+"./APP/src/debug.o" \
 "./APP/src/imu.o" \
 "./APP/src/line_track.o" \
 "./APP/src/pid.o" \
 "./APP/src/pid_test.o" \
-"./APP/src/task.o" \
 "./APP/src/test.o" \
 "./APP/src/ui.o" \
 "./BSP/src/bsp_encoder.o" \
@@ -88,9 +88,6 @@ endif
 ifneq ($(strip $(S64_DEPS)),)
 -include $(S64_DEPS)
 endif
-ifneq ($(strip $(INO_DEPS)),)
--include $(INO_DEPS)
-endif
 ifneq ($(strip $(CLA_DEPS)),)
 -include $(CLA_DEPS)
 endif
@@ -105,9 +102,6 @@ ifneq ($(strip $(C62_DEPS)),)
 endif
 ifneq ($(strip $(C67_DEPS)),)
 -include $(C67_DEPS)
-endif
-ifneq ($(strip $(PDE_DEPS)),)
--include $(PDE_DEPS)
 endif
 ifneq ($(strip $(K_DEPS)),)
 -include $(K_DEPS)
@@ -157,18 +151,16 @@ all: $(OBJS) $(GEN_CMDS)
 
 # Tool invocations
 2024_Question_H.out: $(OBJS) $(GEN_CMDS)
-	@echo 'Building target: "$@"'
-	@echo 'Invoking: Arm Linker'
-	"C:/ti/ccs2031/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/bin/tiarmclang.exe" @"device.opt"  -march=thumbv6m -mcpu=cortex-m0plus -mfloat-abi=soft -mlittle-endian -mthumb -O2 -gdwarf-3 -Wall -Wl,-m"2024_Question_H.map" -Wl,--heap_size=0x800 -Wl,--stack_size=1024 -Wl,-i"C:/ti/mspm0_sdk_2_10_00_04/source" -Wl,-i"C:/Users/chonqin/Desktop/Ti projects/Electronics-Design-Contest-Program/2024QuestionH" -Wl,-i"C:/Users/chonqin/Desktop/Ti projects/Electronics-Design-Contest-Program/2024QuestionH/Debug/syscfg" -Wl,-i"C:/ti/ccs2031/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/lib" -Wl,--diag_wrap=off -Wl,--display_error_number -Wl,--warn_sections -Wl,--xml_link_info="2024_Question_H_linkInfo.xml" -Wl,--rom_model -o "2024_Question_H.out" $(ORDERED_OBJS)
+	@echo 'Arm Linker - building target: "$@"'
+	"D:/TI/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/bin/tiarmclang.exe" @"device.opt"  -march=thumbv6m -mcpu=cortex-m0plus -mfloat-abi=soft -mlittle-endian -mthumb -O2 -gdwarf-3 -Wall -Wl,-m"2024_Question_H.map" -Wl,--heap_size=0x800 -Wl,--stack_size=1024 -Wl,-i"D:/TI/mspm0_sdk_2_10_00_04/source" -Wl,-i"D:/desktop/TI Projects/Electronics-Design-Contest-Program/2024QuestionH" -Wl,-i"D:/desktop/TI Projects/Electronics-Design-Contest-Program/2024QuestionH/Debug/syscfg" -Wl,-i"D:/TI/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/lib" -Wl,--diag_wrap=off -Wl,--display_error_number -Wl,--warn_sections -Wl,--xml_link_info="2024_Question_H_linkInfo.xml" -Wl,--rom_model -o "2024_Question_H.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 
 # Other Targets
 clean:
 	-$(RM) $(GEN_MISC_FILES__QUOTED)$(GEN_FILES__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "ti_msp_dl_config.o" "startup_mspm0g350x_ticlang.o" "main.o" "APP\src\car.o" "APP\src\imu.o" "APP\src\line_track.o" "APP\src\pid.o" "APP\src\pid_test.o" "APP\src\task.o" "APP\src\test.o" "APP\src\ui.o" "BSP\src\bsp_encoder.o" "BSP\src\bsp_icm42688.o" "BSP\src\bsp_key.o" "BSP\src\bsp_motor.o" "BSP\src\bsp_track.o" "BSP\src\bsp_uart.o" "BSP\src\oled.o" "Board\board.o" "Board\board_irq.o" 
-	-$(RM) "ti_msp_dl_config.d" "startup_mspm0g350x_ticlang.d" "main.d" "APP\src\car.d" "APP\src\imu.d" "APP\src\line_track.d" "APP\src\pid.d" "APP\src\pid_test.d" "APP\src\task.d" "APP\src\test.d" "APP\src\ui.d" "BSP\src\bsp_encoder.d" "BSP\src\bsp_icm42688.d" "BSP\src\bsp_key.d" "BSP\src\bsp_motor.d" "BSP\src\bsp_track.d" "BSP\src\bsp_uart.d" "BSP\src\oled.d" "Board\board.d" "Board\board_irq.d" 
-	-@echo 'Finished clean'
+	-$(RM) "ti_msp_dl_config.o" "startup_mspm0g350x_ticlang.o" "main.o" "APP\src\car.o" "APP\src\debug.o" "APP\src\imu.o" "APP\src\line_track.o" "APP\src\pid.o" "APP\src\pid_test.o" "APP\src\test.o" "APP\src\ui.o" "BSP\src\bsp_encoder.o" "BSP\src\bsp_icm42688.o" "BSP\src\bsp_key.o" "BSP\src\bsp_motor.o" "BSP\src\bsp_track.o" "BSP\src\bsp_uart.o" "BSP\src\oled.o" "Board\board.o" "Board\board_irq.o" 
+	-$(RM) "ti_msp_dl_config.d" "startup_mspm0g350x_ticlang.d" "main.d" "APP\src\car.d" "APP\src\debug.d" "APP\src\imu.d" "APP\src\line_track.d" "APP\src\pid.d" "APP\src\pid_test.d" "APP\src\test.d" "APP\src\ui.d" "BSP\src\bsp_encoder.d" "BSP\src\bsp_icm42688.d" "BSP\src\bsp_key.d" "BSP\src\bsp_motor.d" "BSP\src\bsp_track.d" "BSP\src\bsp_uart.d" "BSP\src\oled.d" "Board\board.d" "Board\board_irq.d" 
 	-@echo ' '
 
 .PHONY: all clean dependents

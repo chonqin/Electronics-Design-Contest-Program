@@ -7,68 +7,27 @@
 
 #include "ti_msp_dl_config.h"
 
+/**
+ * @brief 编码器编号
+ *
+ * @details
+ * E1 对应 MOTOR_A，E2 对应 MOTOR_B。
+ */
 typedef enum {
-    FORWARD,
-    REVERSAL
-} ENCODER_DIR;
-
-typedef enum {
-    ENCODER_1 = 0,
-    ENCODER_2,
-    ENCODER_NUM
-} ENCODER_ID;
-
-typedef struct {
-    volatile long long temp_count;
-    int count;
-    ENCODER_DIR dir;
-} ENCODER_RES;
+    ENCODER_E1 = 0,
+    ENCODER_E2 = 1
+} Encoder_ID;
 
 /**
- * @brief 初始化编码器 GPIO 和周期性锁存定时器中断
+ * @brief 初始化双路编码器中断和内部计数状态
  */
-void encoder_init(void);
+void Encoder_Init(void);
 
 /**
- * @brief 获取编码器 1 最新锁存计数
- * @return 编码器 1 计数
+ * @brief 读取单个编码器的最新锁存计数
+ * @param id 编码器编号，取值为 ENCODER_E1 或 ENCODER_E2
+ * @return 当前控制周期内锁存的编码器计数
  */
-int get_encoder_count(void);
-
-/**
- * @brief 获取编码器 1 最新方向
- * @return 编码器 1 方向
- */
-ENCODER_DIR get_encoder_dir(void);
-
-/**
- * @brief 获取指定编码器最新锁存计数
- * @param id 编码器选择
- * @return 指定编码器计数
- */
-int encoder_get_count(ENCODER_ID id);
-
-/**
- * @brief 获取指定编码器最新方向
- * @param id 编码器选择
- * @return 指定编码器方向
- */
-ENCODER_DIR encoder_get_dir(ENCODER_ID id);
-
-/**
- * @brief 将所有编码器脉冲累计值锁存到公共状态
- */
-void encoder_update(void);
-
-/**
- * @brief 处理编码器 GPIO 边沿中断状态
- * @param status 编码器 GPIO 中断状态
- */
-void encoder_gpio_irq_handler(uint32_t status);
-
-/**
- * @brief 处理编码器周期锁存定时器中断
- */
-void encoder_tick_irq_handler(void);
+int Encoder_Read(Encoder_ID id);
 
 #endif

@@ -66,6 +66,7 @@ uint8_t Track_ReadMask(void)
 {
     uint8_t mask = 0;
 
+    // 每一路状态按位打包，方便上层直接做权重计算或判线。
     mask |= (uint8_t)(Track_Read(TRACK_X1) << 0);
     mask |= (uint8_t)(Track_Read(TRACK_X2) << 1);
     mask |= (uint8_t)(Track_Read(TRACK_X3) << 2);

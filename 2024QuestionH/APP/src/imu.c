@@ -126,6 +126,7 @@ static void calGyroVariance(const float data[3], float var[3], float avg[3])
     uint8_t i;
 
     if (gyro_win_ready == 0U) {
+        // 窗口未填满时先累计原始统计量，并保持未就绪状态。
         for (i = 0U; i < 3U; i++) {
             gyro_hist[i][gyro_idx] = data[i];
             gyro_sum[i] += data[i];
@@ -134,6 +135,7 @@ static void calGyroVariance(const float data[3], float var[3], float avg[3])
             avg[i] = 0.0f;
         }
     } else {
+        // 窗口滚动后只增删一组样本，避免重复全量求和。
         for (i = 0U; i < 3U; i++) {
             gyro_sum[i] -= gyro_hist[i][gyro_idx];
             gyro_sqr_sum[i] -= gyro_hist[i][gyro_idx] * gyro_hist[i][gyro_idx];
@@ -193,6 +195,7 @@ static void IMU_AHRSupdate(float gx, float gy, float gz,
 
     acc_mag2 = ax * ax + ay * ay + az * az;
     if (acc_mag2 > 0.25f && acc_mag2 < 4.0f) {
+        // 加速度幅值正常时才参与重力修正，抑制剧烈运动误差。
         norm = invSqrt(acc_mag2);
         ax *= norm;
         ay *= norm;
@@ -222,6 +225,7 @@ static void IMU_AHRSupdate(float gx, float gy, float gz,
         gz += Kp * ez + ezInt;
     }
 
+    // 先按角速度积分，再统一归一化四元数。
     tempq0 = q0 + (-q1 * gx - q2 * gy - q3 * gz) * halfT;
     tempq1 = q1 + ( q0 * gx + q2 * gz - q3 * gy) * halfT;
     tempq2 = q2 + ( q0 * gy - q1 * gz + q3 * gx) * halfT;
@@ -242,6 +246,7 @@ static void IMU_updateYpr(void)
 {
     float pitch_sin;
 
+    // pitch 先限幅，避免反三角函数因数值抖动越界。
     pitch_sin = imu_clampf(-2.0f * q1 * q3 + 2.0f * q0 * q2, -1.0f, 1.0f);
 
     ypr[0] = -atan2f(2.0f * q1 * q2 + 2.0f * q0 * q3,
@@ -304,6 +309,7 @@ void IMU_sample(void)
         (gyro_var[0] < GYRO_STABLE_VAR_TH) &&
         (gyro_var[1] < GYRO_STABLE_VAR_TH) &&
         (gyro_var[2] < GYRO_STABLE_VAR_TH)) {
+        // 静止窗口稳定后更新零偏，并清掉融合积分残差。
         gyro_offset[0] = gyro_avg[0];
         gyro_offset[1] = gyro_avg[1];
         gyro_offset[2] = gyro_avg[2];
@@ -323,6 +329,7 @@ void IMU_sample(void)
         return;
     }
 
+    // 用数据就绪节拍估算积分步长，适配中断驱动采样。
     now = nowtime;
     dt_tick = now - lastUpdate;
     lastUpdate = now;

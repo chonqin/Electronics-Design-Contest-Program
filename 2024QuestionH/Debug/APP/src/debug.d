@@ -1,7 +1,9 @@
 # FIXED
 
-BSP/src/bsp_encoder.o: ../BSP/src/bsp_encoder.c \
- D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_encoder.h \
+APP/src/debug.o: ../APP/src/debug.c \
+ D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/debug.h \
+ D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/car.h \
+ D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_uart.h \
  ti_msp_dl_config.h \
  D:/TI/mspm0_sdk_2_10_00_04/source/ti/devices/msp/msp.h \
  D:/TI/mspm0_sdk_2_10_00_04/source/ti/devices/DeviceFamily.h \
@@ -84,8 +86,12 @@ BSP/src/bsp_encoder.o: ../BSP/src/bsp_encoder.c \
  D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_vref.h \
  D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_wwdt.h \
  D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_interrupt.h \
- D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_systick.h
-D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_encoder.h:
+ D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_systick.h \
+ D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/oled.h \
+ D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/Board/board.h
+D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/debug.h:
+D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/car.h:
+D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_uart.h:
 ti_msp_dl_config.h:
 D:/TI/mspm0_sdk_2_10_00_04/source/ti/devices/msp/msp.h:
 D:/TI/mspm0_sdk_2_10_00_04/source/ti/devices/DeviceFamily.h:
@@ -169,3 +175,5 @@ D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_vref.h:
 D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_wwdt.h:
 D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_interrupt.h:
 D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_systick.h:
+D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/oled.h:
+D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/Board/board.h:

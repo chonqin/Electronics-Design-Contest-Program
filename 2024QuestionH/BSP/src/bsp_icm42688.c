@@ -110,6 +110,7 @@ uint8_t ICM_Init(void)
 {
     uint8_t temp;
 
+    // 先软复位并等待芯片重新上电完成。
     ICM_Write_A_Byte(ICM42688_REG_BANK_SEL, 0x00U);
     ICM_Write_A_Byte(ICM42688_DEVICE_CONFIG, 0x01U);
     ICM_DELAY_MS(100);
@@ -122,6 +123,7 @@ uint8_t ICM_Init(void)
 
     ICM_DELAY_MS(10);
 
+    // 加速度计和陀螺仪统一配置为 200Hz，方便姿态解算固定节拍。
     ICM_Write_A_Byte(ICM42688_REG_BANK_SEL, 0x00U);
     bsp_Icm42688GetAres(AFS_4G);
     temp = (uint8_t)((AFS_4G << 5) | AODR_200Hz);
@@ -201,6 +203,7 @@ int8_t bsp_IcmGetRawData(icm42688_real_data_t *acc_data, icm42688_real_data_t *g
     gyro_raw.y = (int16_t)((buffer[8] << 8) | buffer[9]);
     gyro_raw.z = (int16_t)((buffer[10] << 8) | buffer[11]);
 
+    // 原始整数值在这里统一换算成物理单位，供上层直接使用。
     acc_data->x = acc_raw.x * Acc_Sensitivity;
     acc_data->y = acc_raw.y * Acc_Sensitivity;
     acc_data->z = acc_raw.z * Acc_Sensitivity;

@@ -1,6 +1,6 @@
 /**
- * @file    ui.c
- * @brief   用户界面实现：基础显示函数 + 多级菜单
+ * @file ui.c
+ * @brief OLED UI helpers and task menu implementation.
  */
 
 #include "ui.h"
@@ -9,35 +9,28 @@
 #include "board.h"
 #include <stdio.h>
 
-/* ------------------------------------------------------------------ */
-/*  内部常量                                                            */
-/* ------------------------------------------------------------------ */
-
-/** 一级菜单各项名称，顺序对应 Task_ID */
+/** @brief Menu labels aligned with main.c task dispatch order. */
 static const char *TASK_NAMES[TASK_COUNT] = {
-    "LINE", "ENC", "MOTOR", "IMU", "OLED", "UART", "TRACK"
+    "LINE", "PID", "MOTOR", "IMU", "OLED", "UART", "TRACK"
 };
 
-/** @brief 64px OLED 下 16px 字体可见的最大菜单行数 */
+/** @brief Number of visible rows when using the 16px font. */
 #define MENU_ROWS 4
 
-/* ------------------------------------------------------------------ */
-/*  内部辅助                                                            */
-/* ------------------------------------------------------------------ */
-
 /**
- * @brief 等待所有按键松开，防止同一次按键被重复响应
+ * @brief Wait until all keys are released.
  */
 static void wait_release(void)
 {
-    while (Key_Scan() != -1)
+    while (Key_Scan() != -1) {
         delay_ms(10);
+    }
 }
 
 /**
- * @brief 在固定行绘制菜单光标
- * @param y 行起始坐标
- * @param active 1=选中，0=未选中
+ * @brief Draw the menu cursor on one row.
+ * @param y Row origin on OLED.
+ * @param active Non-zero shows the cursor marker.
  */
 static void show_cursor(u8 y, uint8_t active)
 {
@@ -51,48 +44,27 @@ static void show_cursor(u8 y, uint8_t active)
 }
 
 /**
- * @brief 清空一行 16px 高度文本，不越界写入 OLED 宽度之外
- * @param y 行起始坐标
+ * @brief Clear one 16px text row.
+ * @param y Row origin on OLED.
  */
 static void clear_text_row(u8 y)
 {
     OLED_ShowString(0, y, (u8 *)"                ", 16, 1);
 }
 
-/* ------------------------------------------------------------------ */
-/*  基础显示函数                                                        */
-/* ------------------------------------------------------------------ */
-
 void UI_Init(void)
 {
     Key_Init();
     OLED_Init();
-    OLED_ColorTurn(0);    /* 正常显示（非反色） */
-    OLED_DisplayTurn(0);  /* 正常方向 */
+    OLED_ColorTurn(0);
+    OLED_DisplayTurn(0);
 }
 
 void UI_Test_OLED(void)
 {
     OLED_Clear();
-    OLED_ShowString(0, 0,  (u8 *)"OLED Test", 16, 1);
+    OLED_ShowString(0, 0, (u8 *)"OLED Test", 16, 1);
     OLED_ShowString(0, 20, (u8 *)"TEST String:", 16, 1);
-    OLED_Refresh();
-}
-
-void UI_Test_Encoder(int e1, int e2)
-{
-    char buf[16];
-
-    clear_text_row(20);
-    clear_text_row(40);
-    OLED_ShowString(0, 0, (u8 *)"Encoder Test", 16, 1);
-    OLED_ShowString(0, 20, (u8 *)"E1:", 16, 1);
-    OLED_ShowString(0, 40, (u8 *)"E2:", 16, 1);
-
-    (void)snprintf(buf, sizeof(buf), "%+7d", e1);
-    OLED_ShowString(24, 20, (u8 *)buf, 16, 1);
-    (void)snprintf(buf, sizeof(buf), "%+7d", e2);
-    OLED_ShowString(24, 40, (u8 *)buf, 16, 1);
     OLED_Refresh();
 }
 
@@ -153,10 +125,10 @@ void UI_IMU_Calibrating(void)
 }
 
 /**
- * @brief 在 OLED 指定位置显示有符号浮点数（保留2位小数）
- * @param x, y  显示坐标
- * @param val   浮点值
- * @note  格式固定为 %+7.2f，便于覆盖上一次显示内容。
+ * @brief Draw one signed float with fixed width.
+ * @param x OLED x coordinate.
+ * @param y OLED y coordinate.
+ * @param val Value to render.
  */
 static void show_float(u8 x, u8 y, float val)
 {
@@ -166,53 +138,41 @@ static void show_float(u8 x, u8 y, float val)
     OLED_ShowString(x, y, (u8 *)buf, 16, 1);
 }
 
-/**
- * @brief 刷新 IMU 三轴姿态角到 OLED
- * @param angles  float[3]：[0]=航向角, [1]=俯仰角, [2]=横滚角
- * @note  显示格式：Y:+xxx.xx / P:+xxx.xx / R:+xxx.xx
- */
 void UI_Test_IMU(float *angles)
 {
-    /* 行间距 22px，三行恰好填满 64px 屏幕 */
-
     clear_text_row(0);
     OLED_ShowString(0, 0, (u8 *)"P:", 16, 1);
-    show_float(16, 0, angles[1]);   /* 俯仰角 */
+    show_float(16, 0, angles[1]);
 
     clear_text_row(22);
     OLED_ShowString(0, 22, (u8 *)"R:", 16, 1);
-    show_float(16, 22, angles[2]);   /* 横滚角 */
+    show_float(16, 22, angles[2]);
 
     clear_text_row(44);
     OLED_ShowString(0, 44, (u8 *)"Y:", 16, 1);
-    show_float(16, 44,  angles[0]);   /* 航向角 */
+    show_float(16, 44, angles[0]);
 
     OLED_Refresh();
 }
 
-/* ------------------------------------------------------------------ */
-/*  一级菜单                                                            */
-/* ------------------------------------------------------------------ */
-
 /**
- * @brief 显示并处理一级菜单（TASK1-TASK4）
- * @details KEY1=上移, KEY2=下移, KEY3=确认
- * @return 用户选中的 Task_ID
+ * @brief Handle the first-level task list.
+ * @return Selected task ID.
  */
 static Task_ID UI_Menu_L1(void)
 {
-    int8_t  cur = 0;   /* 当前光标位置 0-3 */
-    int8_t  first = 0;
-    int8_t  key;
+    int8_t cur = 0;
+    int8_t first = 0;
+    int8_t key;
 
     while (1) {
         if (cur < first) {
             first = cur;
         } else if (cur >= (first + MENU_ROWS)) {
+            // 选中项超出可视窗口后，推动顶部索引继续下移。
             first = cur - MENU_ROWS + 1;
         }
 
-        /* --- 刷新显示 --- */
         OLED_Clear();
         for (int8_t row = 0; row < MENU_ROWS; row++) {
             int8_t i = first + row;
@@ -221,100 +181,73 @@ static Task_ID UI_Menu_L1(void)
                 break;
             }
 
-            /* 光标字符：选中行显示 '>'，其余显示 ' ' */
-            if (cur == i) {
-                show_cursor((u8)(row * 16), 1U);
-            } else {
-                show_cursor((u8)(row * 16), 0U);
-            }
+            show_cursor((u8)(row * 16), (uint8_t)(cur == i));
             OLED_ShowString(8, (u8)(row * 16), (u8 *)TASK_NAMES[i], 16, 1);
         }
         OLED_Refresh();
 
-        /* --- 等待按键 --- */
-        do { key = Key_Scan(); } while (key == -1);
+        do {
+            key = Key_Scan();
+        } while (key == -1);
         wait_release();
 
         if (key == KEY_1) {
-            /* 上移，到顶则停 */
-            if (cur > 0) cur--;
+            if (cur > 0) {
+                cur--;
+            }
         } else if (key == KEY_2) {
-            /* 下移，到底则停 */
-            if (cur < TASK_COUNT - 1) cur++;
+            if (cur < (TASK_COUNT - 1)) {
+                cur++;
+            }
         } else if (key == KEY_3) {
-            /* 确认选中 */
             return (Task_ID)cur;
         }
     }
 }
 
-/* ------------------------------------------------------------------ */
-/*  二级菜单                                                            */
-/* ------------------------------------------------------------------ */
-
 /**
- * @brief 显示并处理二级确认菜单
- * @param task  从一级菜单传入的选中任务
- * @details 默认光标在确认项。KEY1/KEY2 切换，KEY3 确认。
- * @return 1=用户确认, 0=用户取消
+ * @brief Handle the second-level confirmation page.
+ * @param task Task chosen from the first-level list.
+ * @return 1 when confirmed, otherwise 0.
  */
 static uint8_t UI_Menu_L2(Task_ID task)
 {
-    uint8_t sel = 0;   /* 0=确认，1=取消；默认指向确认 */
-    int8_t  key;
+    uint8_t sel = 0U;
+    int8_t key;
 
     while (1) {
-        /* --- 刷新显示 --- */
         OLED_Clear();
-        OLED_ShowString(0, 0,  (u8 *)TASK_NAMES[task], 16, 1);   /* 任务名 */
-        OLED_ShowString(0, 16, (u8 *)"  Selected?",     16, 1);   /* 副标题 */
-        /* 确认行 */
-        if (sel == 0U) {
-            show_cursor(32, 1U);
-        } else {
-            show_cursor(32, 0U);
-        }
-        OLED_ShowString(8, 32, (u8 *)"[OK]",            16, 1);
-        /* 取消行 */
-        if (sel == 1U) {
-            show_cursor(48, 1U);
-        } else {
-            show_cursor(48, 0U);
-        }
-        OLED_ShowString(8, 48, (u8 *)"[Cancel]",        16, 1);
+        OLED_ShowString(0, 0, (u8 *)TASK_NAMES[task], 16, 1);
+        OLED_ShowString(0, 16, (u8 *)"  Selected?", 16, 1);
+
+        show_cursor(32, (uint8_t)(sel == 0U));
+        OLED_ShowString(8, 32, (u8 *)"[OK]", 16, 1);
+
+        show_cursor(48, (uint8_t)(sel == 1U));
+        OLED_ShowString(8, 48, (u8 *)"[Cancel]", 16, 1);
         OLED_Refresh();
 
-        /* --- 等待按键 --- */
-        do { key = Key_Scan(); } while (key == -1);
+        do {
+            key = Key_Scan();
+        } while (key == -1);
         wait_release();
 
-        if (key == KEY_1 || key == KEY_2) {
-            /* 在确认和取消之间切换 */
-            sel ^= 1;
+        if ((key == KEY_1) || (key == KEY_2)) {
+            // 确认页只有两个选项，按上下键都执行翻转即可。
+            sel ^= 1U;
         } else if (key == KEY_3) {
-            if (sel == 0U) {
-                return 1U;
-            }
-            return 0U;
+            return (uint8_t)(sel == 0U);
         }
     }
 }
 
-/* ------------------------------------------------------------------ */
-/*  对外菜单入口                                                        */
-/* ------------------------------------------------------------------ */
-
-/**
- * @brief 运行多级菜单，阻塞至用户确认选择一个任务
- * @return 用户最终确认的 Task_ID
- */
 Task_ID UI_Process(void)
 {
     while (1) {
         Task_ID sel = UI_Menu_L1();
-        if (UI_Menu_L2(sel)) {
-            return sel;   /* 用户在二级菜单选了确认 */
+
+        if (UI_Menu_L2(sel) != 0U) {
+            return sel;
         }
-        /* 用户在二级菜单选了取消，回到一级菜单 */
     }
 }

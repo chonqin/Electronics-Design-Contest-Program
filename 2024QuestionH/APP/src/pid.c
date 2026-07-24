@@ -48,6 +48,7 @@ static void PID_LimitSum(PID *pid)
         max = tmp;
     }
 
+    // 将积分项约束在可输出区间内，避免长时间饱和。
     pid->sum = PID_Limit(pid->sum, min, max);
 }
 
@@ -140,11 +141,13 @@ float PID_Calc(PID *pid, float actual)
     PID_LimitSum(pid);
 
     /* 位置式 PID 输出执行量，可直接作为 duty、角速度等控制量使用。 */
+    // 位置式 PID 直接输出当前控制量。
     out = pid->kp * pid->err;
     out += pid->ki * pid->sum;
     out += pid->kd * (pid->err - pid->last_err);
     pid->out = PID_Limit(out, pid->out_min, pid->out_max);
 
+    // 保存近两拍误差，供下一次微分或增量计算使用。
     pid->prev_err = pid->last_err;
     pid->last_err = pid->err;
 
@@ -168,6 +171,7 @@ float PID_CalcInc(PID *pid, float actual)
 
     pid->err = pid->target - actual;
 
+    // 增量式 PID 只计算本拍需要叠加的输出变化量。
     inc = pid->kp * (pid->err - pid->last_err);
     inc += pid->ki * pid->err;
     inc += pid->kd * (pid->err - 2.0f * pid->last_err + pid->prev_err);
