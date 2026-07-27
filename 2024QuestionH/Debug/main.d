@@ -86,8 +86,7 @@ main.o: ../main.c \
  D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_interrupt.h \
  D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_systick.h \
  D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_uart.h \
- D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/line_track.h \
- D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/pid_test.h \
+ D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/task.h \
  D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/test.h \
  D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/ui.h
 D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/Board/board.h:
@@ -175,7 +174,6 @@ D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_wwdt.h:
 D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_interrupt.h:
 D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_systick.h:
 D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_uart.h:
-D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/line_track.h:
-D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/pid_test.h:
+D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/task.h:
 D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/test.h:
 D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/ui.h:

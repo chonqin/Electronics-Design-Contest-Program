@@ -23,7 +23,7 @@ void Test_OLED(void);
 void Test_IMU(void);
 
 /**
- * @brief Run the UART receive echo test.
+ * @brief Run the UART1 receive to UART0 forward test.
  */
 void Test_UartReceive(void);
 

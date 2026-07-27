@@ -1,17 +1,18 @@
 /**
  * @file bsp_track.c
- * @brief 八路循迹模块 BSP 驱动实现（低电平有效）
+ * @brief 八路循迹模块 BSP 驱动实现（低电平表示未检测到黑线）
  */
 #include "bsp_track.h"
 
 /**
  * @brief 读取单路循迹状态
+ * @details 逻辑 X1-X8 直接对应 SysConfig 中的同名 GPIO，并按车头方向从左到右排列。
  * @param id 循迹通道，范围 TRACK_X1 到 TRACK_X8
- * @return 1:检测到黑线  0:未检测到黑线
+ * @return 0:检测到黑线  1:未检测到黑线
  */
 uint8_t Track_Read(Track_ID id)
 {
-    uint32_t raw = 1U;
+    uint32_t raw = 0U;
 
     switch (id) {
         case TRACK_X1:
@@ -50,23 +51,23 @@ uint8_t Track_Read(Track_ID id)
             break;
     }
 
-    /* 循迹模块检测到黑线时输出低电平。 */
+    /* 新循迹模块未检测到黑线时输出低电平。 */
     if (raw == 0) {
-        return 1;
+        return TRACK_STATE_NO_LINE;
     }
 
-    return 0;
+    return TRACK_STATE_LINE;
 }
 
 /**
- * @brief 读取 8 路循迹黑线状态位图
- * @return bit0-bit7 对应 X1-X8，位为 1 表示该路检测到黑线
+ * @brief 读取 8 路循迹模块状态位图
+ * @return bit0-bit7 对应 X1-X8，位为 1 表示未检测到黑线
  */
 uint8_t Track_ReadMask(void)
 {
     uint8_t mask = 0;
 
-    // 每一路状态按位打包，方便上层直接做权重计算或判线。
+    /* 每一路低电平状态转换为位 1，保持与模块定义一致。 */
     mask |= (uint8_t)(Track_Read(TRACK_X1) << 0);
     mask |= (uint8_t)(Track_Read(TRACK_X2) << 1);
     mask |= (uint8_t)(Track_Read(TRACK_X3) << 2);

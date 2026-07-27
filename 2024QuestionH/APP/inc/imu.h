@@ -20,6 +20,7 @@ typedef struct {
 
 extern xyz_f_t north, west;
 extern volatile float yaw[5];
+extern volatile uint32_t nowtime;
 
 /**
  * @brief 初始化 ICM42688P 和姿态融合状态

@@ -167,9 +167,9 @@ bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 #define GPIO_UART_1_IOMUX_TX                                     (IOMUX_PINCM19)
 #define GPIO_UART_1_IOMUX_RX_FUNC                      IOMUX_PINCM20_PF_UART1_RX
 #define GPIO_UART_1_IOMUX_TX_FUNC                      IOMUX_PINCM19_PF_UART1_TX
-#define UART_1_BAUD_RATE                                                  (9600)
-#define UART_1_IBRD_40_MHZ_9600_BAUD                                       (260)
-#define UART_1_FBRD_40_MHZ_9600_BAUD                                        (27)
+#define UART_1_BAUD_RATE                                                (115200)
+#define UART_1_IBRD_40_MHZ_115200_BAUD                                      (21)
+#define UART_1_FBRD_40_MHZ_115200_BAUD                                      (45)
 
 
 
@@ -192,6 +192,14 @@ bool SYSCFG_DL_SYSCTL_SYSPLL_init(void);
 #define GPIO_SPI_IMU_IOMUX_SCLK                                 (IOMUX_PINCM34)
 #define GPIO_SPI_IMU_IOMUX_SCLK_FUNC                 IOMUX_PINCM34_PF_SPI0_SCLK
 
+
+
+/* Defines for DMA_UART0Tx */
+#define DMA_UART0Tx_CHAN_ID                                                  (0)
+#define UART_0_INST_DMA_TRIGGER_0                            (DMA_UART0_TX_TRIG)
+/* Defines for DMA_UART0Rx */
+#define DMA_UART0Rx_CHAN_ID                                                  (1)
+#define UART_0_INST_DMA_TRIGGER_1                            (DMA_UART0_RX_TRIG)
 
 
 /* Port definition for Pin Group GPIO_IMU_CS */
@@ -323,6 +331,7 @@ void SYSCFG_DL_I2C_OLED_init(void);
 void SYSCFG_DL_UART_0_init(void);
 void SYSCFG_DL_UART_1_init(void);
 void SYSCFG_DL_SPI_IMU_init(void);
+void SYSCFG_DL_DMA_init(void);
 
 
 bool SYSCFG_DL_saveConfiguration(void);

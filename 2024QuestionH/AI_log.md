@@ -276,3 +276,27 @@ GPT-5
 - 修正 `Motor_SetDuty()` 中正负 duty 到 PWM 比较值的转换逻辑，使用 duty 绝对值作为 PWM 比较值。
 - 将 PWM 比较值限幅到 `0..MOTOR_PWM_PERIOD`，避免小 duty 被转换成超大 `uint16_t` 后导致满占空比输出。
 - 同步修正 `Motor_SetDuty()` 接口注释中的参数名与含义。
+
+---
+
+## 2026-07-27 完成 UART0 DMA 与 VOFA+ 在线调参链路
+
+### 操作模型
+OpenAI Codex（GPT-5）
+
+### 操作时间
+2026-07-27 11:49:50 +08:00
+
+### 用户确认
+用户完成 CCS 编译、烧录和上位机联调，确认 UART0 可以正常收发数据，VOFA+ 能够接收下位机遥测并向下位机发送命令。
+
+### 操作内容
+- UART0 使用 DMA、FIFO 和发送环形缓冲区发送数据，RX DMA 接收后由主循环消费命令。
+- 下位机每 100 ms 使用 JustFloat 发送底盘状态和两组 PID 参数。
+- 上位机使用紧凑 ASCII 命令设置或增减循迹 PID、yaw PID，并支持 `STOP` 停车。
+- 精简 BSP UART、Debug 和 Car 公共接口，保留 DMA 分段续传、接收快照和临界区等必要逻辑。
+
+### 验证结果
+- UART0 上下行通信正常。
+- VOFA+ 遥测接收正常。
+- VOFA+ 上行命令能够送达下位机。

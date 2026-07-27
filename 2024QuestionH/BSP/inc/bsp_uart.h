@@ -1,73 +1,52 @@
 /**
  * @file bsp_uart.h
- * @brief UART0 环形缓冲接收接口
+ * @brief UART0 DMA 收发与 UART1 阻塞接收接口
  */
 #ifndef BSP_UART_H
 #define BSP_UART_H
 
-#include "ti_msp_dl_config.h"
+#include <stdint.h>
 
 /**
- * @brief UART 接收缓冲区大小
+ * @brief UART0 DMA 接收缓冲区大小
  */
 #define BSP_UART_RX_BUF_SIZE    256U
 
 /**
- * @brief 初始化 UART0 接收环形缓冲
+ * @brief UART0 DMA 发送环形缓冲区大小
+ */
+#define BSP_UART_TX_BUF_SIZE    512U
+
+/**
+ * @brief 初始化 UART0 DMA 收发缓冲区和中断
  */
 void BSP_Uart_Init(void);
 
 /**
- * @brief UART0 中断处理函数
+ * @brief UART0 DMA 完成中断处理入口
  */
 void BSP_Uart_IRQHandler(void);
 
 /**
- * @brief 获取当前缓冲区内可读字节数
- * @return 可读字节数
- */
-uint16_t BSP_Uart_Available(void);
-
-/**
- * @brief 读取单个接收字节
- * @param dat 输出字节地址
- * @return 读取成功返回 1，缓冲为空返回 0
+ * @brief 从 UART0 DMA 接收缓冲区读取一个字节
+ * @param dat 输出字节指针
+ * @return 成功返回 1，无数据或参数无效返回 0
  */
 int BSP_Uart_ReadByte(uint8_t *dat);
 
 /**
- * @brief 批量读取接收数据
- * @param buf 目标缓冲区
- * @param len 期望读取长度
- * @return 实际读取长度
- */
-uint16_t BSP_Uart_Read(uint8_t *buf, uint16_t len);
-
-/**
- * @brief 清空接收缓冲区
- */
-void BSP_Uart_FlushRx(void);
-
-/**
- * @brief 发送单个字节
- * @param dat 待发送字节
- * @return 发送成功返回 1
- */
-int BSP_Uart_WriteByte(uint8_t dat);
-
-/**
- * @brief 批量发送数据
- * @param buf 待发送数据
- * @param len 待发送长度
- * @return 实际发送长度
+ * @brief 将一段数据加入 UART0 DMA 发送队列
+ * @param buf 待发送缓冲区
+ * @param len 待发送字节数
+ * @return 成功返回 len，队列空间不足返回 0
  */
 uint16_t BSP_Uart_Write(uint8_t const *buf, uint16_t len);
 
 /**
- * @brief 发送字符串
- * @param str 待发送字符串
- * @return 实际发送字符数
+ * @brief 阻塞读取 UART1 的一个字节
+ * @param dat 输出字节指针
+ * @return 成功返回 1，参数无效返回 0
  */
-uint16_t BSP_Uart_WriteString(char const *str);
+int BSP_Uart1_ReadByteBlocking(uint8_t *dat);
 
 #endif

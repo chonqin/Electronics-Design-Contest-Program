@@ -18,7 +18,6 @@
 #define MOTOR_DUTY_STEP     100
 #define MOTOR_DUTY_MAX      MOTOR_PWM_PERIOD
 #define MOTOR_DUTY_MIN      (-MOTOR_PWM_PERIOD)
-#define UART_TEST_BUF_SIZE  64U
 
 /**
  * @brief Wait until one key action is fully released.
@@ -86,7 +85,7 @@ void Test_Motor(void)
         e2 = Encoder_Read(ENCODER_E2);
 
         UI_Test_Motor(duty, e1, e2);
-        lc_printf("Motor duty:%d e1:%d e2:%d\r\n", duty, e1, e2);
+        printf("Motor duty:%d e1:%d e2:%d\r\n", duty, e1, e2);
         delay_ms(50);
     }
 }
@@ -128,27 +127,21 @@ void Test_IMU(void)
 
     while (1) {
         IMU_getYawPitchRoll(angles);
-        // 页面与串口都直接显示当前姿态解算结果。
         UI_Test_IMU(angles);
-        lc_printf("P R Y:%.2f , %.2f , %.2f\n", angles[1], angles[2], angles[0]);
+        printf("P R Y:%.2f , %.2f , %.2f\n", angles[1], angles[2], angles[0]);
     }
 }
 
 void Test_UartReceive(void)
 {
-    uint8_t buf[UART_TEST_BUF_SIZE];
-    uint16_t len;
+    uint8_t dat;
 
-    BSP_Uart_FlushRx();
-    lc_printf("UART0 receive echo test start\r\n");
+    printf("UART1 RX to UART0 TX test start\r\n");
 
     while (1) {
-        len = BSP_Uart_Read(buf, UART_TEST_BUF_SIZE);
-
-        if (len > 0U) {
-            /* Echo host data directly to verify the RX/TX path. */
-            (void)BSP_Uart_Write(buf, len);
-        }
+        /* Block on UART1 RX, then forward the same byte through UART0. */
+        (void)BSP_Uart1_ReadByteBlocking(&dat);
+        (void)BSP_Uart_Write(&dat, 1U);
     }
 }
 
@@ -168,14 +161,14 @@ void Test_Track(void)
         for (uint8_t i = 0U; i < 8U; i++) {
             line[6U + i] = '0';
             if ((mask & (uint8_t)(1U << i)) != 0U) {
-                /* bit0-bit7 map to X1-X8, and 1 means black line detected. */
+                /* bit0-bit7 map to X1-X8, and 1 means no black line detected. */
                 line[6U + i] = '1';
             }
         }
 
         OLED_ShowString(0, 24, (u8 *)line, 16, 1);
         OLED_Refresh();
-        lc_printf("%s\r\n", line);
+        printf("%s\r\n", line);
         delay_ms(100);
     }
 }

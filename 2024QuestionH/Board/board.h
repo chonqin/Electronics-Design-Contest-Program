@@ -4,6 +4,11 @@
 
 #include "ti_msp_dl_config.h"
 
+/** @brief VOFA+ JustFloat 模式下是否允许 UART0 文本日志 */
+#ifndef BOARD_TEXT_LOG_ENABLE
+#define BOARD_TEXT_LOG_ENABLE 0U
+#endif
+
 #ifndef u8
 #define u8 uint8_t
 #endif
@@ -28,9 +33,6 @@ int LOG_Debug_Out(const char* __file, const char* __func, int __line, const char
     } while (0)
 
 
-
-/* 使用可变参数是实现的类printf函数 */
-int lc_printf(char* format,...);
 
 /* 延时函数 */
 void delay_us(int __us);

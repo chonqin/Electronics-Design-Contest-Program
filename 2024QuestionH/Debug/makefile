@@ -16,9 +16,9 @@ ORDERED_OBJS += \
 "./APP/src/car.o" \
 "./APP/src/debug.o" \
 "./APP/src/imu.o" \
-"./APP/src/line_track.o" \
 "./APP/src/pid.o" \
 "./APP/src/pid_test.o" \
+"./APP/src/task.o" \
 "./APP/src/test.o" \
 "./APP/src/ui.o" \
 "./BSP/src/bsp_encoder.o" \
@@ -159,8 +159,8 @@ all: $(OBJS) $(GEN_CMDS)
 # Other Targets
 clean:
 	-$(RM) $(GEN_MISC_FILES__QUOTED)$(GEN_FILES__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "ti_msp_dl_config.o" "startup_mspm0g350x_ticlang.o" "main.o" "APP\src\car.o" "APP\src\debug.o" "APP\src\imu.o" "APP\src\line_track.o" "APP\src\pid.o" "APP\src\pid_test.o" "APP\src\test.o" "APP\src\ui.o" "BSP\src\bsp_encoder.o" "BSP\src\bsp_icm42688.o" "BSP\src\bsp_key.o" "BSP\src\bsp_motor.o" "BSP\src\bsp_track.o" "BSP\src\bsp_uart.o" "BSP\src\oled.o" "Board\board.o" "Board\board_irq.o" 
-	-$(RM) "ti_msp_dl_config.d" "startup_mspm0g350x_ticlang.d" "main.d" "APP\src\car.d" "APP\src\debug.d" "APP\src\imu.d" "APP\src\line_track.d" "APP\src\pid.d" "APP\src\pid_test.d" "APP\src\test.d" "APP\src\ui.d" "BSP\src\bsp_encoder.d" "BSP\src\bsp_icm42688.d" "BSP\src\bsp_key.d" "BSP\src\bsp_motor.d" "BSP\src\bsp_track.d" "BSP\src\bsp_uart.d" "BSP\src\oled.d" "Board\board.d" "Board\board_irq.d" 
+	-$(RM) "ti_msp_dl_config.o" "startup_mspm0g350x_ticlang.o" "main.o" "APP\src\car.o" "APP\src\debug.o" "APP\src\imu.o" "APP\src\pid.o" "APP\src\pid_test.o" "APP\src\task.o" "APP\src\test.o" "APP\src\ui.o" "BSP\src\bsp_encoder.o" "BSP\src\bsp_icm42688.o" "BSP\src\bsp_key.o" "BSP\src\bsp_motor.o" "BSP\src\bsp_track.o" "BSP\src\bsp_uart.o" "BSP\src\oled.o" "Board\board.o" "Board\board_irq.o" 
+	-$(RM) "ti_msp_dl_config.d" "startup_mspm0g350x_ticlang.d" "main.d" "APP\src\car.d" "APP\src\debug.d" "APP\src\imu.d" "APP\src\pid.d" "APP\src\pid_test.d" "APP\src\task.d" "APP\src\test.d" "APP\src\ui.d" "BSP\src\bsp_encoder.d" "BSP\src\bsp_icm42688.d" "BSP\src\bsp_key.d" "BSP\src\bsp_motor.d" "BSP\src\bsp_track.d" "BSP\src\bsp_uart.d" "BSP\src\oled.d" "Board\board.d" "Board\board_irq.d" 
 	-@echo ' '
 
 .PHONY: all clean dependents

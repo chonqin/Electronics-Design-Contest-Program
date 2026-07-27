@@ -11,7 +11,8 @@
 
 /** @brief Menu labels aligned with main.c task dispatch order. */
 static const char *TASK_NAMES[TASK_COUNT] = {
-    "LINE", "PID", "MOTOR", "IMU", "OLED", "UART", "TRACK"
+    "TASK1", "TASK2", "TASK3", "MOTOR",
+    "IMU", "OLED", "UART", "TRACK"
 };
 
 /** @brief Number of visible rows when using the 16px font. */

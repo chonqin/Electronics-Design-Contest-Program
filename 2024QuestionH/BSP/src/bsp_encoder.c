@@ -4,8 +4,9 @@
  */
 #include "bsp_encoder.h"
 
-static volatile long long pulse[2];
-static int count[2];
+static volatile int32_t pulse[2];
+static volatile int32_t count[2];
+volatile uint8_t encoder_tick;
 
 /**
  * @brief 编码器方向符号修正，用于统一前进为正
@@ -61,14 +62,26 @@ static void encoder_count_ab(uint8_t idx, uint32_t status, uint32_t a_pin, uint3
 }
 
 /**
- * @brief 将单个编码器累计脉冲锁存为当前周期计数
- * @param idx 编码器下标
+ * @brief 原子锁存双路编码器累计脉冲
  */
-static void encoder_latch(uint8_t idx)
+static void encoder_latch(void)
 {
-    // 定时锁存把一个采样周期内的脉冲数转成速度反馈。
-    count[idx] = (int)(pulse[idx] * sign[idx]);
-    pulse[idx] = 0;
+    uint32_t primask;
+    int32_t p0;
+    int32_t p1;
+
+    primask = __get_PRIMASK();
+    __disable_irq();
+    p0 = pulse[0];
+    p1 = pulse[1];
+    pulse[0] = 0;
+    pulse[1] = 0;
+    if (primask == 0U) {
+        __enable_irq();
+    }
+
+    count[0] = p0 * sign[0];
+    count[1] = p1 * sign[1];
 }
 
 void Encoder_Init(void)
@@ -77,6 +90,7 @@ void Encoder_Init(void)
     pulse[1] = 0;
     count[0] = 0;
     count[1] = 0;
+    encoder_tick = 0U;
 
     NVIC_ClearPendingIRQ(GPIOB_INT_IRQn);
     NVIC_EnableIRQ(GPIOB_INT_IRQn);
@@ -87,7 +101,7 @@ void Encoder_Init(void)
 
 int Encoder_Read(Encoder_ID id)
 {
-    return count[encoder_idx(id)];
+    return (int)count[encoder_idx(id)];
 }
 
 /**
@@ -106,6 +120,6 @@ void Encoder_GpioIrqHandler(uint32_t status)
  */
 void Encoder_TickIrqHandler(void)
 {
-    encoder_latch(0U);
-    encoder_latch(1U);
+    encoder_latch();
+    encoder_tick = 1U;
 }

@@ -41,27 +41,28 @@ void IIC_delay(void)
 }
 
 
-//发送一个字节
-//mode:数据/命令标志 0,表示命令;1,表示数据;
+/**
+ * @brief 阻塞发送一个 OLED 字节
+ * @param dat 待发送字节
+ * @param mode OLED_CMD 或 OLED_DATA
+ */
 void OLED_WR_Byte(u8 dat,u8 mode)
 {
+    uint8_t buf[2] = {0U};
 
-    uint8_t Send_Buff[5] = {0};
+    if (mode != 0U) {
+        buf[0] = 0x40U;
+    } else {
+        buf[0] = 0x00U;
+    }
 
-    uint8_t SendData_Count = 2;
-
-    if(mode)
-        Send_Buff[0] = 0x40;
-    else
-        Send_Buff[0] = 0x00;
-
-    Send_Buff[1] = dat;
-
-    DL_I2C_fillControllerTXFIFO(I2C_OLED_INST, Send_Buff, SendData_Count);
-
-    while (!(DL_I2C_getControllerStatus(I2C_OLED_INST) & DL_I2C_CONTROLLER_STATUS_IDLE));
-    DL_I2C_startControllerTransfer(I2C_OLED_INST, 0x3C, DL_I2C_CONTROLLER_DIRECTION_TX, SendData_Count);
-
+    buf[1] = dat;
+    while ((DL_I2C_getControllerStatus(I2C_OLED_INST) &
+            DL_I2C_CONTROLLER_STATUS_IDLE) == 0U) {
+    }
+    DL_I2C_fillControllerTXFIFO(I2C_OLED_INST, buf, 2U);
+    DL_I2C_startControllerTransfer(I2C_OLED_INST, 0x3CU,
+                                   DL_I2C_CONTROLLER_DIRECTION_TX, 2U);
 }
 
 //开启OLED显示 
@@ -426,4 +427,3 @@ void OLED_Init(void)
 	OLED_Clear();
 	OLED_WR_Byte(0xAF,OLED_CMD);
 }
-

@@ -22,16 +22,25 @@ typedef enum {
     TRACK_NUM
 } Track_ID;
 
+/** @brief 单路探头检测到黑线时的逻辑状态 */
+#define TRACK_STATE_LINE       0U
+
+/** @brief 单路探头未检测到黑线时的逻辑状态 */
+#define TRACK_STATE_NO_LINE    1U
+
+/** @brief 八路探头均未检测到黑线时的位图 */
+#define TRACK_MASK_NO_LINE     0xFFU
+
 /**
  * @brief 读取单路循迹状态
  * @param id 循迹通道，范围 TRACK_X1 到 TRACK_X8
- * @return 1:检测到黑线  0:未检测到黑线
+ * @return 0:检测到黑线  1:未检测到黑线
  */
 uint8_t Track_Read(Track_ID id);
 
 /**
- * @brief 读取 8 路循迹黑线状态位图
- * @return bit0-bit7 对应 X1-X8，位为 1 表示该路检测到黑线
+ * @brief 读取 8 路循迹模块状态位图
+ * @return bit0-bit7 对应 X1-X8，位为 1 表示未检测到黑线
  */
 uint8_t Track_ReadMask(void);
 

@@ -130,7 +130,7 @@ void PID_SetTarget(PID *pid, float target)
 
 float PID_Calc(PID *pid, float actual)
 {
-    float out;
+    float out = 0.0f;
 
     if (pid == 0) {
         return 0.0f;

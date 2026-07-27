@@ -289,7 +289,6 @@ TIMER2.timerMode       = "PERIODIC";
 
 UART1.$name                    = "UART_0";
 UART1.uartClkSrc               = "MFCLK";
-UART1.targetBaudRate           = 115200;
 UART1.enableFIFO               = true;
 UART1.enableDMARX              = false;
 UART1.enableDMATX              = false;

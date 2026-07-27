@@ -18,7 +18,8 @@ typedef enum {
     TASK_5 = 4,
     TASK_6 = 5,
     TASK_7 = 6,
-    TASK_COUNT = 7,
+    TASK_8 = 7,
+    TASK_COUNT = 8,
     TASK_NONE = -1
 } Task_ID;
 

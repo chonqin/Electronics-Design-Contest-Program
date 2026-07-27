@@ -23,6 +23,12 @@ typedef enum {
 void Motor_Init(void);
 
 /**
+ * @brief 对单个电机执行短刹车。
+ * @param motor 电机选择，取值为 MOTOR_A 或 MOTOR_B。
+ */
+void Motor_Brake(Motor_ID motor);
+
+/**
  * @brief 设置单个电机占空比
  * @param motor 电机选择，取值为 MOTOR_A 或 MOTOR_B
  * @param duty 占空比命令，范围 [-MOTOR_PWM_PERIOD, MOTOR_PWM_PERIOD]

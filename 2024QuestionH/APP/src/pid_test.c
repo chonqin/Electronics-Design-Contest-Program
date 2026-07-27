@@ -10,6 +10,7 @@
 #include "bsp_motor.h"
 #include "pid.h"
 #include "ui.h"
+#include <stdio.h>
 
 /* 与 car.c 保持一致：10 倍误差映射 + 增量式 PI 修正。 */
 #define PID_TEST_KP         1.0f
@@ -181,12 +182,11 @@ void PID_Test_Run(void)
         Motor_SetDuty(motor_off, 0);
 
         UI_Test_PID(wheel, actual, target, out);
-        lc_printf("actual,target,err,inc,out:%d , %d , %d , %d , %d\r\n",
-                  actual,
-                  target,
-                  err,
-                  inc,
-                  out);
-        delay_ms(50);
+        printf("actual,target,err,inc,out:%d , %d , %d , %d , %d\r\n",
+               actual,
+               target,
+               err,
+               inc,
+               out);
     }
 }

@@ -19,12 +19,17 @@ typedef enum {
 } Encoder_ID;
 
 /**
+ * @brief 20 ms chassis control tick set after encoder samples are latched.
+ */
+extern volatile uint8_t encoder_tick;
+
+/**
  * @brief 初始化双路编码器中断和内部计数状态
  */
 void Encoder_Init(void);
 
 /**
- * @brief 读取单个编码器的最新锁存计数
+ * @brief 读取单个编码器的最新 20 ms 锁存计数
  * @param id 编码器编号，取值为 ENCODER_E1 或 ENCODER_E2
  * @return 当前控制周期内锁存的编码器计数
  */

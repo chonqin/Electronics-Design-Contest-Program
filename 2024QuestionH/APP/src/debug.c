@@ -1,110 +1,190 @@
 /**
  * @file debug.c
- * @brief Unified UART and OLED debug output for car tests.
+ * @brief 底盘 UART 调试输出
  */
-
 #include "debug.h"
 #include "bsp_uart.h"
-#include "oled.h"
-#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
 #include <string.h>
 
-#define DEBUG_OLED_W       128U
-#define DEBUG_OLED_ROW_LEN 16U
+#define DEBUG_CHANNEL_COUNT 15U
+#define DEBUG_CMD_BUF_SIZE  24U
+#define DEBUG_GAIN_MAX      100.0f
 
-extern u8 OLED_GRAM[144][8];
-
-/**
- * @brief Clear one 16px text row in OLED GRAM.
- * @param y Row start y coordinate.
- */
-static void debug_clear_row(u8 y)
-{
-    OLED_ShowString(0, y, (u8 *)"                ", 16, 1);
-}
+static char cmd_buf[DEBUG_CMD_BUF_SIZE];
+static uint8_t cmd_len;
+static uint8_t cmd_drop;
+static int8_t cmd_status;
 
 /**
- * @brief Refresh only selected OLED pages instead of the full screen.
- * @param page First page index.
- * @param cnt Page count.
+ * @brief 解析并执行一条紧凑 PID 调参命令
+ * @param line 以空字符结尾的命令
+ * @return 1 表示成功，-1 表示格式错误，-2 表示数值越界
+ * @note 命令格式：TKP/TKI/TKD/YKP/YKI/YKD 后接操作符和非负数值。
+ *       '=' 设置绝对值，'+' 在当前值上增加，'-' 在当前值上减少。
+ *       示例：TKP=0.18、YKD+0.10、YKI-0.05。
  */
-static void debug_refresh_pages(u8 page, u8 cnt)
+static int debug_parse_pid(char const *line)
 {
-    u8 p;
-    u8 x;
+    char *end;
+    char op;
+    float value;
+    float next;
+    Car_PidId id;
+    Car_PidTerm term;
+    Car_PidParams param;
 
-    for (p = page; (p < 8U) && (p < (u8)(page + cnt)); p++) {
-        OLED_WR_Byte((u8)(0xB0U + p), OLED_CMD);
-        OLED_WR_Byte(0x00, OLED_CMD);
-        OLED_WR_Byte(0x10, OLED_CMD);
+    if (strlen(line) < 5U || line[1] != 'K') {
+        return -1;
+    }
 
-        for (x = 0U; x < DEBUG_OLED_W; x++) {
-            OLED_WR_Byte(OLED_GRAM[x][p], OLED_DATA);
+    if (line[0] == 'T') {
+        id = CAR_PID_TRACK;
+    } else if (line[0] == 'Y') {
+        id = CAR_PID_YAW;
+    } else {
+        return -1;
+    }
+
+    if (line[2] == 'P') {
+        term = CAR_PID_KP;
+    } else if (line[2] == 'I') {
+        term = CAR_PID_KI;
+    } else if (line[2] == 'D') {
+        term = CAR_PID_KD;
+    } else {
+        return -1;
+    }
+
+    op = line[3];
+    if (op != '=' && op != '+' && op != '-') {
+        return -1;
+    }
+
+    value = strtof(&line[4], &end);
+    if (end == &line[4] || *end != '\0') {
+        return -1;
+    }
+    if (!isfinite(value) || value < 0.0f) {
+        return -2;
+    }
+
+    if (op == '=') {
+        next = value;
+    } else {
+        Car_GetPidParams(id, &param);
+        if (term == CAR_PID_KP) {
+            next = param.kp;
+        } else if (term == CAR_PID_KI) {
+            next = param.ki;
+        } else {
+            next = param.kd;
+        }
+        if (op == '+') {
+            next += value;
+        } else {
+            next -= value;
         }
     }
-}
 
-/**
- * @brief Draw one fixed-width debug row to OLED GRAM.
- * @param y Row start y coordinate.
- * @param str ASCII text, clipped by caller buffer length.
- */
-static void debug_show_row(u8 y, const char *str)
-{
-    debug_clear_row(y);
-    OLED_ShowString(0, y, (u8 *)str, 16, 1);
-}
-
-/**
- * @brief Send one wheel speed line to UART.
- * @param actual Actual encoder speed.
- * @param target Target wheel speed.
- */
-static void debug_uart_speed(int actual, int target)
-{
-    char buf[64];
-    int len;
-
-    len = snprintf(buf, sizeof(buf),
-                   "Actual Speed,Target Speed: %d, %d\r\n",
-                   actual,
-                   target);
-    if (len > 0) {
-        (void)BSP_Uart_Write((uint8_t const *)buf, (uint16_t)strlen(buf));
+    if (!isfinite(next) || next < 0.0f || next > DEBUG_GAIN_MAX) {
+        return -2;
     }
+
+    if (Car_SetPidParam(id, term, next) != 0U) {
+        return 1;
+    }
+
+    return -1;
 }
 
-void Debug_Output(const Car_Status *st)
+static void debug_parse_line(void)
 {
-    Car_PidParam pid;
-    char row[DEBUG_OLED_ROW_LEN + 1U];
+    int result;
 
-    if (st == NULL) {
+    if (cmd_drop != 0U) {
+        cmd_status = -3;
         return;
     }
 
-    // 当前模式对应的 PID 参数从底盘状态层统一读取。
-    Car_GetPidParam(&pid);
+    cmd_buf[cmd_len] = '\0';
+    if (cmd_len == 0U) {
+        return;
+    }
 
-    /* UART order is left wheel first, right wheel second. */
-    debug_uart_speed(st->speed_l, st->target_l);
-    debug_uart_speed(st->speed_r, st->target_r);
+    if (strcmp(cmd_buf, "STOP") == 0) {
+        Car_Stop();
+        cmd_status = 1;
+        return;
+    }
 
-    (void)snprintf(row, sizeof(row), "PID:%.2g %.2g %.2g",
-                   (double)pid.kp,
-                   (double)pid.ki,
-                   (double)pid.kd);
-    debug_show_row(0, row);
+    result = debug_parse_pid(cmd_buf);
+    cmd_status = (int8_t)result;
+}
 
-    (void)snprintf(row, sizeof(row), "pos:%+06d", st->track_pos);
-    debug_show_row(16, row);
+void Debug_Output(void)
+{
+    Car_Status st;
+    Car_PidParams track;
+    Car_PidParams yaw;
+    float frame[DEBUG_CHANNEL_COUNT + 1U];
+    uint32_t tail = 0x7F800000U;
 
-    /* Car status stores left=E2 and right=E1, so display order is E1 then E2. */
-    (void)snprintf(row, sizeof(row), "E1 E2:%+4d %+4d",
-                   st->speed_r,
-                   st->speed_l);
-    debug_show_row(32, row);
+    Car_GetStatus(&st);
+    Car_GetPidParams(CAR_PID_TRACK, &track);
+    Car_GetPidParams(CAR_PID_YAW, &yaw);
 
-    // 只刷新已写入的页面，减少整屏刷新的等待。
-    debug_refresh_pages(0U, 6U);
+    /* 通道顺序固定：位置、编码器、duty、yaw、两组 PID、循迹状态和命令结果。 */
+    frame[0] = (float)st.track_pos;
+    frame[1] = (float)st.enc_l;
+    frame[2] = (float)st.enc_r;
+    frame[3] = (float)st.duty_l;
+    frame[4] = (float)st.duty_r;
+    frame[5] = st.yaw;
+    frame[6] = track.kp;
+    frame[7] = track.ki;
+    frame[8] = track.kd;
+    frame[9] = yaw.kp;
+    frame[10] = yaw.ki;
+    frame[11] = yaw.kd;
+    frame[12] = (float)st.track_mask;
+    frame[13] = (float)st.mode;
+    frame[14] = (float)cmd_status;
+    memcpy(&frame[DEBUG_CHANNEL_COUNT], &tail, sizeof(tail));
+
+    (void)BSP_Uart_Write((uint8_t const *)frame, sizeof(frame));
+}
+
+void Debug_CommandPoll(void)
+{
+    uint8_t dat;
+    uint16_t budget = 128U;
+
+    while (budget > 0U && BSP_Uart_ReadByte(&dat) != 0) {
+        budget--;
+
+        if (dat == '\r') {
+            continue;
+        }
+
+        /* 上行格式：TKP=0.18、TKP+0.01、TKP-0.01 或 STOP，以换行结束。 */
+        if (dat == '\n') {
+            debug_parse_line();
+            cmd_len = 0U;
+            cmd_drop = 0U;
+            continue;
+        }
+
+        if (cmd_drop != 0U) {
+            continue;
+        }
+
+        if (cmd_len >= (DEBUG_CMD_BUF_SIZE - 1U)) {
+            cmd_drop = 1U;
+            continue;
+        }
+
+        cmd_buf[cmd_len++] = (char)dat;
+    }
 }

@@ -16,6 +16,29 @@ void Motor_Init(void)
     Motor_SetDuty(MOTOR_B, 0);
 }
 
+void Motor_Brake(Motor_ID motor)
+{
+    uint32_t pin1;
+    uint32_t pin2;
+    DL_TIMER_CC_INDEX cc_idx;
+
+    if (motor == MOTOR_A) {
+        pin1 = GPIO_MOTOR_AIN1_PIN;
+        pin2 = GPIO_MOTOR_AIN2_PIN;
+        cc_idx = DL_TIMER_CC_0_INDEX;
+    } else if (motor == MOTOR_B) {
+        pin1 = GPIO_MOTOR_BIN1_PIN;
+        pin2 = GPIO_MOTOR_BIN2_PIN;
+        cc_idx = DL_TIMER_CC_1_INDEX;
+    } else {
+        return;
+    }
+
+    /* 短刹车：两路输入同电平，PWM 置零。 */
+    DL_GPIO_setPins(GPIO_MOTOR_PORT, pin1 | pin2);
+    DL_TimerA_setCaptureCompareValue(PWM_MOTOR_INST, 0U, cc_idx);
+}
+
 void Motor_SetDuty(Motor_ID motor, int16_t duty)
 {
     uint32_t pin1;
