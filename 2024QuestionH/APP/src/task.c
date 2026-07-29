@@ -9,7 +9,8 @@
 #include "car.h"
 #include "debug.h"
 
-#define TASK_TRACK_DUTY 1100
+/** @brief AT8236 循迹基础 duty，给起转阈值保留一定余量。 */
+#define TASK_TRACK_DUTY 2600
 #define TASK_DEBUG_TICKS 5U
 
 /** @brief Task3基于20 ms控制周期的拐角参数 */

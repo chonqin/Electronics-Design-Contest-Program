@@ -11,21 +11,24 @@
 #include "ti_msp_dl_config.h"
 #include <math.h>
 
-#define LEFT_MOTOR              MOTOR_B
-#define RIGHT_MOTOR             MOTOR_A
+#define LEFT_MOTOR              MOTOR_A
+#define RIGHT_MOTOR             MOTOR_B
 #define LEFT_ENCODER            ENCODER_E2
 #define RIGHT_ENCODER           ENCODER_E1
-#define CAR_TRACK_KP            7.0f
-#define CAR_TRACK_KI            0.04f
-#define CAR_TRACK_KD            2.0f
-#define CAR_TRACK_TURN_MAX      1000
+/** @brief AT8236 新 duty 工作区间下的循迹 PID 初始参数。 */
+#define CAR_TRACK_KP            1.5f
+#define CAR_TRACK_KI            0.02f
+#define CAR_TRACK_KD            1.2f
+#define CAR_TRACK_TURN_MAX      200
 #define CAR_TRACK_LOST_MAX      10U
 #define CAR_YAW_KP              16.0f
 #define CAR_YAW_KI              0.18f
 #define CAR_YAW_KD              1.9f
 #define CAR_YAW_TURN_MAX        1000
 #define CAR_TURN_DONE_DEG       2.0f
-#define CAR_DUTY_MIN            300
+
+/** @brief AT8236 实测起转补偿阈值，低于该 duty 电机基本无法克服静摩擦。 */
+#define CAR_DUTY_MIN            2200
 
 static const int track_weight[TRACK_NUM] = {
     -100, -70, -40, -10, 10, 40, 70, 100

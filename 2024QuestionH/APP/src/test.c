@@ -52,7 +52,7 @@ static int test_limit_int(int val, int min, int max)
 void Test_Motor(void)
 {
     int8_t key;
-    int duty = 0;
+    int duty = -3000;
     int e1 = 0;
     int e2 = 0;
 

@@ -1,6 +1,6 @@
 /**
  * @file    bsp_key.c
- * @brief   按键驱动实现（低电平有效，带消抖）
+ * @brief   按键驱动实现（低电平有效，带消抖，临时交换 KEY1/KEY2）
  */
 #include "bsp_key.h"
 #include "board.h"
@@ -36,22 +36,23 @@ Key_State Key_Read(Key_ID key)
 {
     uint32_t raw1, raw2;
 
+    /* 临时映射：逻辑 KEY1 使用物理 KEY2，逻辑 KEY2 使用物理 KEY1。 */
     switch (key) {
         case KEY_1:
-            raw1 = DL_GPIO_readPins(GPIO_KEY_PIN_18_PORT, GPIO_KEY_PIN_18_PIN);
+            raw1 = DL_GPIO_readPins(GPIO_KEY_PIN_13_PORT, GPIO_KEY_PIN_13_PIN);
             debug_key1_raw = raw1;
             if (raw1 != 0) return KEY_RELEASED;
             // 低电平有效，首次检测到按下后再做一次延时确认。
             delay_ms(10);
-            raw2 = DL_GPIO_readPins(GPIO_KEY_PIN_18_PORT, GPIO_KEY_PIN_18_PIN);
+            raw2 = DL_GPIO_readPins(GPIO_KEY_PIN_13_PORT, GPIO_KEY_PIN_13_PIN);
             return (raw2 == 0) ? KEY_PRESSED : KEY_RELEASED;
 
         case KEY_2:
-            raw1 = DL_GPIO_readPins(GPIO_KEY_PIN_13_PORT, GPIO_KEY_PIN_13_PIN);
+            raw1 = DL_GPIO_readPins(GPIO_KEY_PIN_18_PORT, GPIO_KEY_PIN_18_PIN);
             debug_key2_raw = raw1;
             if (raw1 != 0) return KEY_RELEASED;
             delay_ms(10);
-            raw2 = DL_GPIO_readPins(GPIO_KEY_PIN_13_PORT, GPIO_KEY_PIN_13_PIN);
+            raw2 = DL_GPIO_readPins(GPIO_KEY_PIN_18_PORT, GPIO_KEY_PIN_18_PIN);
             return (raw2 == 0) ? KEY_PRESSED : KEY_RELEASED;
 
         case KEY_3:

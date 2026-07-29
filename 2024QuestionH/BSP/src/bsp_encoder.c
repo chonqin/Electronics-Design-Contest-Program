@@ -12,11 +12,11 @@ volatile uint8_t encoder_tick;
  * @brief 编码器方向符号修正，用于统一前进为正
  *
  * @details
- * E1 对应 MOTOR_A，E2 对应 MOTOR_B。
+ * E1 对应 MOTOR_A，E2 对应 MOTOR_B；E2 实测方向相反，在这里翻转符号。
  */
 static const int sign[2] = {
     -1,
-    1
+    -1
 };
 
 /**
