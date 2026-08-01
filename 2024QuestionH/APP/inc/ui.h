@@ -23,6 +23,13 @@ typedef enum {
     TASK_NONE = -1
 } Task_ID;
 
+/** @brief PB0 门控计时界面的当前状态。 */
+typedef enum {
+    UI_TIMER_WAIT = 0,
+    UI_TIMER_RUNNING,
+    UI_TIMER_STOPPED
+} UI_TimerState;
+
 /**
  * @brief Initialize keys and OLED for the UI.
  */
@@ -67,10 +74,38 @@ void UI_IMU_Calibrating(void);
  */
 void UI_Test_IMU(float *angles);
 
+/** @brief 显示“任务1：图传测试”页面。 */
+void UI_Task1VideoTest(void);
+
+/**
+ * @brief 实时显示任务运行时间
+ * @param task 任务编号
+ * @param ms 当前用时，单位为 ms
+ * @param odo 自发车以来的车体中心累计编码器计数
+ */
+void UI_TaskRunning(uint8_t task, uint32_t ms, int32_t odo);
+
+/**
+ * @brief 显示指定任务的最终计时结果
+ * @param task 任务编号
+ * @param ms 最终用时，单位为 ms
+ * @param odo 停车时的车体中心累计编码器计数
+ */
+void UI_TaskResult(uint8_t task, uint32_t ms, int32_t odo);
+
+/**
+ * @brief 显示指定任务的 PB0 门控计时状态和时间
+ * @param task 任务编号
+ * @param ms 当前或最终用时，单位为 ms
+ * @param state 当前计时状态
+ */
+void UI_TaskGateTimer(uint8_t task, uint32_t ms, UI_TimerState state);
+
 /**
  * @brief Run the menu flow until one task is confirmed.
+ * @param confirm_ms 输出确认键被识别时的时间戳，单位为 ms
  * @return Selected task ID.
  */
-Task_ID UI_Process(void);
+Task_ID UI_Process(uint32_t *confirm_ms);
 
 #endif

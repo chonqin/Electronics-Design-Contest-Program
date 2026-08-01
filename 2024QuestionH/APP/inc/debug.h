@@ -6,6 +6,13 @@
 #define DEBUG_H
 
 #include "car.h"
+#include <stdint.h>
+
+/**
+ * @brief 更新 VOFA+ 中的任务 1 用时通道
+ * @param ms 任务 1 用时，单位为 ms
+ */
+void Debug_SetTask1Time(uint32_t ms);
 
 /**
  * @brief 输出一帧底盘 UART 调试数据

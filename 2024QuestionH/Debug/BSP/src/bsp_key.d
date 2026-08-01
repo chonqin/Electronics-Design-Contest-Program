@@ -1,7 +1,7 @@
 # FIXED
 
 BSP/src/bsp_key.o: ../BSP/src/bsp_key.c \
- D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_key.h \
+ D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_key.h \
  ti_msp_dl_config.h \
  D:/TI/mspm0_sdk_2_10_00_04/source/ti/devices/msp/msp.h \
  D:/TI/mspm0_sdk_2_10_00_04/source/ti/devices/DeviceFamily.h \
@@ -85,8 +85,8 @@ BSP/src/bsp_key.o: ../BSP/src/bsp_key.c \
  D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_wwdt.h \
  D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_interrupt.h \
  D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_systick.h \
- D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/Board/board.h
-D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_key.h:
+ D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/Board/board.h
+D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_key.h:
 ti_msp_dl_config.h:
 D:/TI/mspm0_sdk_2_10_00_04/source/ti/devices/msp/msp.h:
 D:/TI/mspm0_sdk_2_10_00_04/source/ti/devices/DeviceFamily.h:
@@ -170,4 +170,4 @@ D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_vref.h:
 D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_wwdt.h:
 D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_interrupt.h:
 D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_systick.h:
-D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/Board/board.h:
+D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/Board/board.h:

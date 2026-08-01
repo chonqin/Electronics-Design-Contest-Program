@@ -152,7 +152,7 @@ all: $(OBJS) $(GEN_CMDS)
 # Tool invocations
 2024_Question_H.out: $(OBJS) $(GEN_CMDS)
 	@echo 'Arm Linker - building target: "$@"'
-	"D:/TI/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/bin/tiarmclang.exe" @"device.opt"  -march=thumbv6m -mcpu=cortex-m0plus -mfloat-abi=soft -mlittle-endian -mthumb -O2 -gdwarf-3 -Wall -Wl,-m"2024_Question_H.map" -Wl,--heap_size=0x800 -Wl,--stack_size=1024 -Wl,-i"D:/TI/mspm0_sdk_2_10_00_04/source" -Wl,-i"D:/desktop/TI Projects/Electronics-Design-Contest-Program/2024QuestionH" -Wl,-i"D:/desktop/TI Projects/Electronics-Design-Contest-Program/2024QuestionH/Debug/syscfg" -Wl,-i"D:/TI/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/lib" -Wl,--diag_wrap=off -Wl,--display_error_number -Wl,--warn_sections -Wl,--xml_link_info="2024_Question_H_linkInfo.xml" -Wl,--rom_model -o "2024_Question_H.out" $(ORDERED_OBJS)
+	"D:/TI/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/bin/tiarmclang.exe" @"device.opt"  -march=thumbv6m -mcpu=cortex-m0plus -mfloat-abi=soft -mlittle-endian -mthumb -O2 -gdwarf-3 -Wall -Wl,-m"2024_Question_H.map" -Wl,--heap_size=0x800 -Wl,--stack_size=1024 -Wl,-i"D:/TI/mspm0_sdk_2_10_00_04/source" -Wl,-i"D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH" -Wl,-i"D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/Debug/syscfg" -Wl,-i"D:/TI/ccs/tools/compiler/ti-cgt-armllvm_4.0.4.LTS/lib" -Wl,--diag_wrap=off -Wl,--display_error_number -Wl,--warn_sections -Wl,--xml_link_info="2024_Question_H_linkInfo.xml" -Wl,--rom_model -o "2024_Question_H.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 

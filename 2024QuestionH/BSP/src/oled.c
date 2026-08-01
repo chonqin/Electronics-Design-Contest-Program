@@ -81,11 +81,23 @@ void OLED_DisPlay_Off(void)
 	OLED_WR_Byte(0xAE,OLED_CMD);//关闭屏幕
 }
 
-//更新显存到OLED	
-void OLED_Refresh(void)
+/**
+ * @brief 刷新连续的 OLED 显存页
+ * @param first 起始页，范围为 0 到 7
+ * @param count 刷新页数
+ */
+void OLED_RefreshPages(u8 first, u8 count)
 {
 	u8 i,n;
-	for(i=0;i<8;i++)
+
+	if ((first >= 8U) || (count == 0U)) {
+		return;
+	}
+	if (count > (u8)(8U - first)) {
+		count = (u8)(8U - first);
+	}
+
+	for(i=first;i<(u8)(first + count);i++)
 	{
 		OLED_WR_Byte(0xb0+i,OLED_CMD); //设置行起始地址
 		OLED_WR_Byte(0x00,OLED_CMD);   //设置低列起始地址
@@ -97,6 +109,12 @@ void OLED_Refresh(void)
 			OLED_WR_Byte(OLED_GRAM[n][i], OLED_DATA);
 		}
     }
+}
+
+/** @brief 更新全部显存到 OLED */
+void OLED_Refresh(void)
+{
+	OLED_RefreshPages(0U, 8U);
 }
 //清屏函数
 void OLED_Clear(void)

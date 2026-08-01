@@ -1,6 +1,6 @@
 /**
  * @file bsp_motor.h
- * @brief AT8236 双路直流电机驱动接口
+ * @brief TB6612 双路直流电机驱动接口
  */
 #ifndef BSP_MOTOR_H
 #define BSP_MOTOR_H
@@ -10,12 +10,12 @@
 #include "ti_msp_dl_config.h"
 
 typedef enum {
-    MOTOR_A = 0, /**< 电机1：PB10/IN1、PB11/IN2，对应编码器 E1。 */
-    MOTOR_B = 1  /**< 电机2：PA15/IN1、PA24/IN2，对应编码器 E2。 */
+    MOTOR_A = 0, /**< 电机1：PA15/PWMA、PB10/AIN1、PB13/AIN2，对应编码器 E1。 */
+    MOTOR_B = 1  /**< 电机2：PA24/PWMB、PB15/BIN1、PB16/BIN2，对应编码器 E2。 */
 } Motor_ID;
 
 /**
- * @brief PWM 周期值，对应 SysConfig 中 TIMG6 和 TIMA1 的 period 配置。
+ * @brief PWM 周期值，对应 SysConfig 中 TIMA1 的 period 配置。
  */
 #define MOTOR_PWM_PERIOD    4000
 
@@ -37,9 +37,8 @@ void Motor_Brake(Motor_ID motor);
  * @return 无返回值
  *
  * @details
- * 两路电机以小车物理运动方向为准；由于左右电机镜像安装，MOTOR_B 的输出极性
- * 在底层自动反转。相同符号的 duty 会使左右轮朝相同的车体方向转动，duty = 0
- * 时两个输入均置低。
+ * 两路电机不做额外极性补偿，duty 正负直接决定各自的方向输入组合。duty = 0 时
+ * PWM 清零且两个方向输入均置低。STBY 由硬件保持高电平。
  */
 void Motor_SetDuty(Motor_ID motor, int16_t duty);
 

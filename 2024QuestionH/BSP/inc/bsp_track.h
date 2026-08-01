@@ -31,6 +31,9 @@ typedef enum {
 /** @brief 八路探头均未检测到黑线时的位图 */
 #define TRACK_MASK_NO_LINE     0xFFU
 
+/** @brief 八路探头均检测到黑线时的位图 */
+#define TRACK_MASK_ALL_LINE    0x00U
+
 /**
  * @brief 读取单路循迹状态
  * @param id 循迹通道，范围 TRACK_X1 到 TRACK_X8

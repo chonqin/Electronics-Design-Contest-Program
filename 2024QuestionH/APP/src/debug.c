@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEBUG_CHANNEL_COUNT 15U
+#define DEBUG_CHANNEL_COUNT 16U
 #define DEBUG_CMD_BUF_SIZE  24U
 #define DEBUG_GAIN_MAX      100.0f
 
@@ -16,6 +16,12 @@ static char cmd_buf[DEBUG_CMD_BUF_SIZE];
 static uint8_t cmd_len;
 static uint8_t cmd_drop;
 static int8_t cmd_status;
+static float task1_time_s;
+
+void Debug_SetTask1Time(uint32_t ms)
+{
+    task1_time_s = (float)ms / 1000.0f;
+}
 
 /**
  * @brief 解析并执行一条紧凑 PID 调参命令
@@ -135,7 +141,7 @@ void Debug_Output(void)
     Car_GetPidParams(CAR_PID_TRACK, &track);
     Car_GetPidParams(CAR_PID_YAW, &yaw);
 
-    /* 通道顺序固定：位置、编码器、duty、yaw、两组 PID、循迹状态和命令结果。 */
+    /* 通道顺序固定，末通道为任务 1 从确认按键开始计算的用时。 */
     frame[0] = (float)st.track_pos;
     frame[1] = (float)st.enc_l;
     frame[2] = (float)st.enc_r;
@@ -151,6 +157,7 @@ void Debug_Output(void)
     frame[12] = (float)st.track_mask;
     frame[13] = (float)st.mode;
     frame[14] = (float)cmd_status;
+    frame[15] = task1_time_s;
     memcpy(&frame[DEBUG_CHANNEL_COUNT], &tail, sizeof(tail));
 
     (void)BSP_Uart_Write((uint8_t const *)frame, sizeof(frame));

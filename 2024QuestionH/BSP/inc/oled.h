@@ -15,6 +15,12 @@ void OLED_WR_Byte(u8 dat,u8 mode);
 void OLED_DisPlay_On(void);
 void OLED_DisPlay_Off(void);
 void OLED_Refresh(void);
+/**
+ * @brief Refresh consecutive OLED display pages.
+ * @param first First page index, from 0 to 7.
+ * @param count Number of pages to refresh.
+ */
+void OLED_RefreshPages(u8 first, u8 count);
 void OLED_Clear(void);
 void OLED_DrawPoint(u8 x,u8 y,u8 t);
 void OLED_DrawLine(u8 x1,u8 y1,u8 x2,u8 y2,u8 mode);

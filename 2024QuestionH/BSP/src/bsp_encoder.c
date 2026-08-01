@@ -6,7 +6,10 @@
 
 static volatile int32_t pulse[2];
 static volatile int32_t count[2];
+static volatile int32_t total[2];
 volatile uint8_t encoder_tick;
+static volatile uint32_t time_ms;
+static uint8_t time_on;
 
 /**
  * @brief 编码器方向符号修正，用于统一前进为正
@@ -82,26 +85,77 @@ static void encoder_latch(void)
 
     count[0] = p0 * sign[0];
     count[1] = p1 * sign[1];
+    /* 在固定采样中断中累计，避免主循环因 OLED 刷新错过里程脉冲。 */
+    total[0] += count[0];
+    total[1] += count[1];
+}
+
+void Encoder_TimeInit(void)
+{
+    if (time_on != 0U) {
+        return;
+    }
+
+    /* 单调时基在菜单阶段启动，后续底盘初始化不能清零。 */
+    time_ms = 0U;
+    time_on = 1U;
+    NVIC_ClearPendingIRQ(TIMER_ENCODER_TICK_INST_INT_IRQN);
+    NVIC_EnableIRQ(TIMER_ENCODER_TICK_INST_INT_IRQN);
+}
+
+uint32_t Encoder_GetMs(void)
+{
+    return time_ms;
 }
 
 void Encoder_Init(void)
 {
+    uint32_t primask;
+
+    primask = __get_PRIMASK();
+    __disable_irq();
     pulse[0] = 0;
     pulse[1] = 0;
     count[0] = 0;
     count[1] = 0;
+    total[0] = 0;
+    total[1] = 0;
     encoder_tick = 0U;
+    if (primask == 0U) {
+        __enable_irq();
+    }
 
     NVIC_ClearPendingIRQ(GPIOB_INT_IRQn);
     NVIC_EnableIRQ(GPIOB_INT_IRQn);
 
-    NVIC_ClearPendingIRQ(TIMER_ENCODER_TICK_INST_INT_IRQN);
-    NVIC_EnableIRQ(TIMER_ENCODER_TICK_INST_INT_IRQN);
+    Encoder_TimeInit();
 }
 
 int Encoder_Read(Encoder_ID id)
 {
     return (int)count[encoder_idx(id)];
+}
+
+void Encoder_ReadTotals(int32_t *e1, int32_t *e2)
+{
+    uint32_t primask;
+    int32_t t0;
+    int32_t t1;
+
+    primask = __get_PRIMASK();
+    __disable_irq();
+    t0 = total[0];
+    t1 = total[1];
+    if (primask == 0U) {
+        __enable_irq();
+    }
+
+    if (e1 != 0) {
+        *e1 = t0;
+    }
+    if (e2 != 0) {
+        *e2 = t1;
+    }
 }
 
 /**
@@ -121,5 +175,6 @@ void Encoder_GpioIrqHandler(uint32_t status)
 void Encoder_TickIrqHandler(void)
 {
     encoder_latch();
+    time_ms += 20U;
     encoder_tick = 1U;
 }

@@ -43,6 +43,9 @@ typedef struct {
     int track_pos;
     int enc_l;
     int enc_r;
+    int32_t odo_l; /**< 左轮自发车以来的累计编码器计数 */
+    int32_t odo_r; /**< 右轮自发车以来的累计编码器计数 */
+    int32_t odo;   /**< 左右轮累计计数的算术平均值 */
     int duty_l;
     int duty_r;
     float yaw;
@@ -59,6 +62,12 @@ void Car_Stop(void);
  * @param duty 循迹基础 PWM duty
  */
 void Car_SetTrack(int duty);
+
+/**
+ * @brief 更新当前循迹模式的基础 PWM duty，不重置循迹 PID
+ * @param duty 新的循迹基础 PWM duty
+ */
+void Car_SetTrackDuty(int duty);
 
 /**
  * @brief 设置循迹丢线后是否按最后位置自动寻线

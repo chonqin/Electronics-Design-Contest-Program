@@ -1,6 +1,6 @@
 /**
  * @file bsp_track.c
- * @brief 八路循迹模块 BSP 驱动实现（低电平表示未检测到黑线）
+ * @brief 八路循迹模块 BSP 驱动实现（低电平表示检测到黑线）
  */
 #include "bsp_track.h"
 
@@ -51,12 +51,12 @@ uint8_t Track_Read(Track_ID id)
             break;
     }
 
-    /* 新循迹模块未检测到黑线时输出低电平。 */
+    /* GPIO 低电平表示检测到黑线，高电平表示未识别到黑线。 */
     if (raw == 0) {
-        return TRACK_STATE_NO_LINE;
+        return TRACK_STATE_LINE;
     }
 
-    return TRACK_STATE_LINE;
+    return TRACK_STATE_NO_LINE;
 }
 
 /**
@@ -67,7 +67,7 @@ uint8_t Track_ReadMask(void)
 {
     uint8_t mask = 0;
 
-    /* 每一路低电平状态转换为位 1，保持与模块定义一致。 */
+    /* 每一路高电平状态转换为位 1，表示该路未检测到黑线。 */
     mask |= (uint8_t)(Track_Read(TRACK_X1) << 0);
     mask |= (uint8_t)(Track_Read(TRACK_X2) << 1);
     mask |= (uint8_t)(Track_Read(TRACK_X3) << 2);

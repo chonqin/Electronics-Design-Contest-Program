@@ -1,8 +1,8 @@
 # FIXED
 
 BSP/src/oled.o: ../BSP/src/oled.c \
- D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/oled.h \
- D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/Board/board.h \
+ D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/oled.h \
+ D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/Board/board.h \
  ti_msp_dl_config.h \
  D:/TI/mspm0_sdk_2_10_00_04/source/ti/devices/msp/msp.h \
  D:/TI/mspm0_sdk_2_10_00_04/source/ti/devices/DeviceFamily.h \
@@ -86,9 +86,9 @@ BSP/src/oled.o: ../BSP/src/oled.c \
  D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_wwdt.h \
  D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_interrupt.h \
  D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_systick.h \
- D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/oledfont.h
-D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/oled.h:
-D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/Board/board.h:
+ D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/oledfont.h
+D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/oled.h:
+D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/Board/board.h:
 ti_msp_dl_config.h:
 D:/TI/mspm0_sdk_2_10_00_04/source/ti/devices/msp/msp.h:
 D:/TI/mspm0_sdk_2_10_00_04/source/ti/devices/DeviceFamily.h:
@@ -172,4 +172,4 @@ D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_vref.h:
 D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_wwdt.h:
 D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_interrupt.h:
 D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_systick.h:
-D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/oledfont.h:
+D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/oledfont.h:

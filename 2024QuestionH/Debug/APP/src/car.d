@@ -1,8 +1,8 @@
 # FIXED
 
 APP/src/car.o: ../APP/src/car.c \
- D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/car.h \
- D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_encoder.h \
+ D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/car.h \
+ D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_encoder.h \
  ti_msp_dl_config.h \
  D:/TI/mspm0_sdk_2_10_00_04/source/ti/devices/msp/msp.h \
  D:/TI/mspm0_sdk_2_10_00_04/source/ti/devices/DeviceFamily.h \
@@ -86,12 +86,12 @@ APP/src/car.o: ../APP/src/car.c \
  D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_wwdt.h \
  D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_interrupt.h \
  D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_systick.h \
- D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_motor.h \
- D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_track.h \
- D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/imu.h \
- D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/pid.h
-D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/car.h:
-D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_encoder.h:
+ D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_motor.h \
+ D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_track.h \
+ D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/imu.h \
+ D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/pid.h
+D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/car.h:
+D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_encoder.h:
 ti_msp_dl_config.h:
 D:/TI/mspm0_sdk_2_10_00_04/source/ti/devices/msp/msp.h:
 D:/TI/mspm0_sdk_2_10_00_04/source/ti/devices/DeviceFamily.h:
@@ -175,7 +175,7 @@ D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_vref.h:
 D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/dl_wwdt.h:
 D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_interrupt.h:
 D:/TI/mspm0_sdk_2_10_00_04/source/ti/driverlib/m0p/dl_systick.h:
-D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_motor.h:
-D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_track.h:
-D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/imu.h:
-D:/desktop/TI\ Projects/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/pid.h:
+D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_motor.h:
+D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/BSP/inc/bsp_track.h:
+D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/imu.h:
+D:/desktop/tb6612/Electronics-Design-Contest-Program/2024QuestionH/APP/inc/pid.h:

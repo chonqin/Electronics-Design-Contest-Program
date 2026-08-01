@@ -11,15 +11,15 @@
 #include "ti_msp_dl_config.h"
 #include <math.h>
 
-#define LEFT_MOTOR              MOTOR_A
-#define RIGHT_MOTOR             MOTOR_B
+#define LEFT_MOTOR              MOTOR_B
+#define RIGHT_MOTOR             MOTOR_A
 #define LEFT_ENCODER            ENCODER_E2
 #define RIGHT_ENCODER           ENCODER_E1
-/** @brief AT8236 新 duty 工作区间下的循迹 PID 初始参数。 */
-#define CAR_TRACK_KP            1.5f
-#define CAR_TRACK_KI            0.02f
-#define CAR_TRACK_KD            1.2f
-#define CAR_TRACK_TURN_MAX      200
+
+#define CAR_TRACK_KP            17.8f
+#define CAR_TRACK_KI            0.2f
+#define CAR_TRACK_KD            1.5f
+#define CAR_TRACK_TURN_MAX      1000
 #define CAR_TRACK_LOST_MAX      10U
 #define CAR_YAW_KP              16.0f
 #define CAR_YAW_KI              0.18f
@@ -27,11 +27,11 @@
 #define CAR_YAW_TURN_MAX        1000
 #define CAR_TURN_DONE_DEG       2.0f
 
-/** @brief AT8236 实测起转补偿阈值，低于该 duty 电机基本无法克服静摩擦。 */
-#define CAR_DUTY_MIN            2200
+
+#define CAR_DUTY_MIN            300
 
 static const int track_weight[TRACK_NUM] = {
-    -100, -70, -40, -10, 10, 40, 70, 100
+    -128, -70, -40, -10, 10, 40, 70, 128
 };
 
 typedef struct {
@@ -151,6 +151,7 @@ static void car_prepare_imu(void)
         DL_TimerA_stopCounter(TIMER_IMU_TICK_INST);
         NVIC_DisableIRQ(TIMER_IMU_TICK_INST_INT_IRQN);
         DL_GPIO_clearInterruptStatus(GPIO_IMU_INT_PORT, GPIO_IMU_INT_PA16_PIN);
+        DL_GPIO_enableInterrupt(GPIO_IMU_INT_PORT, GPIO_IMU_INT_PA16_PIN);
         NVIC_ClearPendingIRQ(GPIO_IMU_INT_INT_IRQN);
         NVIC_EnableIRQ(GPIO_IMU_INT_INT_IRQN);
         car.imu_on = 1U;
@@ -263,11 +264,16 @@ void Car_Init(void)
     car.st.track_pos = 0;
     car.st.enc_l = 0;
     car.st.enc_r = 0;
+    car.st.odo_l = 0;
+    car.st.odo_r = 0;
+    car.st.odo = 0;
     car.st.duty_l = 0;
     car.st.duty_r = 0;
     car.st.yaw = 0.0f;
+    /* 普通循迹不使用 IMU，显式关闭数据就绪中断以保持 20 ms 控制周期。 */
+    DL_GPIO_disableInterrupt(GPIO_IMU_INT_PORT, GPIO_IMU_INT_PA16_PIN);
+    DL_GPIO_clearInterruptStatus(GPIO_IMU_INT_PORT, GPIO_IMU_INT_PA16_PIN);
     Car_Stop();
-    car_prepare_imu();
 }
 
 void Car_Stop(void)
@@ -284,8 +290,15 @@ void Car_SetTrack(int duty)
 {
     PID_Reset(&car.pid_track);
     car_reset_action();
-    car.base = duty;
+    car.base = car_limit(duty, 0, MOTOR_PWM_PERIOD);
     car.st.mode = CAR_MODE_TRACK;
+}
+
+void Car_SetTrackDuty(int duty)
+{
+    if (car.st.mode == CAR_MODE_TRACK) {
+        car.base = car_limit(duty, 0, MOTOR_PWM_PERIOD);
+    }
 }
 
 void Car_SetTrackLostSearch(uint8_t enable)
@@ -317,8 +330,17 @@ void Car_SetHeading(int duty, float yaw)
 
 void Car_Update(void)
 {
+    int32_t e1_total;
+    int32_t e2_total;
+
     car.st.enc_l = Encoder_Read(LEFT_ENCODER);
     car.st.enc_r = Encoder_Read(RIGHT_ENCODER);
+    Encoder_ReadTotals(&e1_total, &e2_total);
+    car.st.odo_l = e2_total;
+    car.st.odo_r = e1_total;
+    /* 差速底盘中心里程取左右轮累计计数平均，暂不进行长度换算。 */
+    car.st.odo = (int32_t)(((int64_t)car.st.odo_l +
+                            (int64_t)car.st.odo_r) / 2);
     car.st.track_mask = Track_ReadMask();
     if (car.imu_on != 0U) {
         car_update_yaw();
