@@ -16,7 +16,7 @@ void task1_run(void);
  */
 void task2_run(uint32_t start_ms);
 
-/** @brief 运行任务 3 的 PB0 高电平门控计时逻辑。 */
+/** @brief 运行任务 3 的 PB0 状态机门控计时逻辑。 */
 void task3_run(void);
 
 /**

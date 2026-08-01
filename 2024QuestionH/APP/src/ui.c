@@ -119,7 +119,7 @@ static void show_task_info(uint8_t task, uint32_t ms, int32_t odo)
 /**
  * @brief 将任务编号、PB0 状态和时间写入 OLED 显存
  * @param task 任务编号
- * @param ms 当前或最终用时，单位为 ms
+ * @param ms 当前或最终时间，单位为 ms
  * @param state 当前计时状态
  */
 static void show_gate_timer(uint8_t task, uint32_t ms, UI_TimerState state)
@@ -301,13 +301,21 @@ void UI_TaskResult(uint8_t task, uint32_t ms, int32_t odo)
 
 void UI_TaskGateTimer(uint8_t task, uint32_t ms, UI_TimerState state)
 {
+    uint8_t first = 0U;
     static UI_TimerState last_state = UI_TIMER_STOPPED;
 
     if (run_task != task) {
         OLED_Clear();
+        first = 1U;
     }
     run_task = task;
     show_gate_timer(task, ms, state);
+    if (first != 0U) {
+        /* 首次进入时刷新全部页面，清除菜单底部可能残留的像素。 */
+        OLED_Refresh();
+        last_state = state;
+        return;
+    }
     if (last_state != state) {
         OLED_RefreshPages(0U, 4U);
         last_state = state;

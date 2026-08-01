@@ -23,7 +23,7 @@ typedef enum {
     TASK_NONE = -1
 } Task_ID;
 
-/** @brief PB0 门控计时界面的当前状态。 */
+/** @brief 任务 3 门控计时状态。 */
 typedef enum {
     UI_TIMER_WAIT = 0,
     UI_TIMER_RUNNING,
@@ -94,9 +94,9 @@ void UI_TaskRunning(uint8_t task, uint32_t ms, int32_t odo);
 void UI_TaskResult(uint8_t task, uint32_t ms, int32_t odo);
 
 /**
- * @brief 显示指定任务的 PB0 门控计时状态和时间
+ * @brief 显示指定任务的门控计时状态和时间
  * @param task 任务编号
- * @param ms 当前或最终用时，单位为 ms
+ * @param ms 当前或最终时间，单位为 ms
  * @param state 当前计时状态
  */
 void UI_TaskGateTimer(uint8_t task, uint32_t ms, UI_TimerState state);

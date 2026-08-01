@@ -36,8 +36,8 @@
 #define TASK6_PARK_ODO 23000U
 /** @brief OLED 运行界面刷新间隔，25 个控制周期为 500 ms。 */
 #define TASK_UI_TICKS 25U
-/** @brief PB0 计时界面刷新周期。 */
-#define TASK_GATE_REFRESH_MS 100U
+/** @brief 任务 3 运行中 OLED 的时间刷新周期。 */
+#define TASK3_TIME_REFRESH_MS 100U
 /** @brief VOFA+ 遥测刷新间隔，5 个控制周期为 100 ms。 */
 #define TASK_DEBUG_TICKS 5U
 
@@ -217,7 +217,7 @@ void task2_run(uint32_t start_ms)
     task_track_run(2U, start_ms, TASK2_TIME_STOP_ODO, TASK2_PARK_ODO, 0U);
 }
 
-/** @brief 执行任务 3 的 PB0 高电平门控计时。 */
+/** @brief 执行任务 3 的 PB0 状态机门控计时。 */
 void task3_run(void)
 {
     UI_TimerState state = UI_TIMER_WAIT;
@@ -230,7 +230,7 @@ void task3_run(void)
     high = (DL_GPIO_readPins(BOARD_TASK3_GATE_PORT,
                              BOARD_TASK3_GATE_PIN) != 0U);
     if (high != 0U) {
-        /* 进入任务时已经为高电平，则从首次读取时立即开始计时。 */
+        /* 进入任务时 PB0 已为高电平，状态机直接进入计时状态。 */
         start_ms = Encoder_GetMs();
         last_ms = start_ms;
         state = UI_TIMER_RUNNING;
@@ -242,28 +242,35 @@ void task3_run(void)
         high = (DL_GPIO_readPins(BOARD_TASK3_GATE_PORT,
                                  BOARD_TASK3_GATE_PIN) != 0U);
 
-        if (state == UI_TIMER_WAIT) {
-            if (high != 0U) {
-                /* 首次检测到高电平时记录起点，菜单耗时不计入结果。 */
-                start_ms = Encoder_GetMs();
-                last_ms = start_ms;
-                state = UI_TIMER_RUNNING;
-                UI_TaskGateTimer(3U, 0U, state);
-            }
-            continue;
-        }
+        switch (state) {
+            case UI_TIMER_WAIT:
+                if (high != 0U) {
+                    /* 高电平沿开启计时，菜单阶段的时间不计入结果。 */
+                    start_ms = Encoder_GetMs();
+                    last_ms = start_ms;
+                    ms = 0U;
+                    state = UI_TIMER_RUNNING;
+                    UI_TaskGateTimer(3U, ms, state);
+                }
+                break;
 
-        if (state == UI_TIMER_RUNNING) {
-            now_ms = Encoder_GetMs();
-            ms = now_ms - start_ms;
-            if (high == 0U) {
-                /* 低电平到来后锁定最终时间，本次任务不再重新启动。 */
-                state = UI_TIMER_STOPPED;
-                UI_TaskGateTimer(3U, ms, state);
-            } else if ((now_ms - last_ms) >= TASK_GATE_REFRESH_MS) {
-                last_ms = now_ms;
-                UI_TaskGateTimer(3U, ms, state);
-            }
+            case UI_TIMER_RUNNING:
+                now_ms = Encoder_GetMs();
+                ms = now_ms - start_ms;
+                if (high == 0U) {
+                    /* 低电平停止并锁定时间，状态机不再重新开启。 */
+                    state = UI_TIMER_STOPPED;
+                    UI_TaskGateTimer(3U, ms, state);
+                } else if ((now_ms - last_ms) >= TASK3_TIME_REFRESH_MS) {
+                    last_ms = now_ms;
+                    UI_TaskGateTimer(3U, ms, state);
+                }
+                break;
+
+            case UI_TIMER_STOPPED:
+            default:
+                /* 停止态保持最终显示，即使 PB0 再次变高也不重新计时。 */
+                break;
         }
     }
 }

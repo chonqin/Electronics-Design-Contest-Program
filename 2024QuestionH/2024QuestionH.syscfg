@@ -217,7 +217,7 @@ GPIO9.port                               = "PORTB";
 GPIO9.associatedPins[0].$name            = "pin0";
 GPIO9.associatedPins[0].assignedPin      = "0";
 GPIO9.associatedPins[0].direction        = "INPUT";
-GPIO9.associatedPins[0].internalResistor = "PULL_UP";
+GPIO9.associatedPins[0].internalResistor = "PULL_DOWN";
 
 I2C1.basicEnableController             = true;
 I2C1.$name                             = "I2C_OLED";
