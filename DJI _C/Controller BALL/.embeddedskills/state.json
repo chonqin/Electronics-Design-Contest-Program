@@ -1,0 +1,22 @@
+{
+  "last_build": {
+    "provider": "gcc",
+    "action": "build",
+    "project": "D:\\desktop\\DJI _C\\8.USART_receive_and_send",
+    "preset": "Debug",
+    "log_dir": "D:\\desktop\\DJI _C\\8.USART_receive_and_send\\.embeddedskills\\build",
+    "artifacts": {
+      "build_dir": "D:\\desktop\\DJI _C\\8.USART_receive_and_send\\build\\Debug",
+      "elf_file": "D:\\desktop\\DJI _C\\8.USART_receive_and_send\\build\\Debug\\usart.elf",
+      "debug_file": "D:\\desktop\\DJI _C\\8.USART_receive_and_send\\build\\Debug\\usart.elf",
+      "flash_file": "D:\\desktop\\DJI _C\\8.USART_receive_and_send\\build\\Debug\\usart.elf",
+      "log_file": "D:\\desktop\\DJI _C\\8.USART_receive_and_send\\.embeddedskills\\build\\8.USART_receive_and_send-Debug-build.log"
+    },
+    "build_dir": "D:\\desktop\\DJI _C\\8.USART_receive_and_send\\build\\Debug",
+    "elf_file": "D:\\desktop\\DJI _C\\8.USART_receive_and_send\\build\\Debug\\usart.elf",
+    "debug_file": "D:\\desktop\\DJI _C\\8.USART_receive_and_send\\build\\Debug\\usart.elf",
+    "flash_file": "D:\\desktop\\DJI _C\\8.USART_receive_and_send\\build\\Debug\\usart.elf",
+    "log_file": "D:\\desktop\\DJI _C\\8.USART_receive_and_send\\.embeddedskills\\build\\8.USART_receive_and_send-Debug-build.log",
+    "timestamp": "2026-08-01T16:29:18+08:00"
+  }
+}
