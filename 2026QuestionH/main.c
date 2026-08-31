@@ -20,7 +20,7 @@ int main(void)
     printf("Hello %s\r\n", "World");
 
     UI_Init();
-    while (1) {
+    while (1) { 
         uint32_t confirm_ms;
         Task_ID task = UI_Process(&confirm_ms);
 
